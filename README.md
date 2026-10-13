@@ -126,3 +126,14 @@ trong README của repo
 - Notification "đang hoạt động" luôn hiển thị trong lúc service nền đang
   chạy, không được ẩn.
 - Bấm Back luôn đưa app xuống nền, không đóng hẳn ứng dụng.
+
+## Chế độ chỉ cùng mạng (LAN only)
+
+Mặc định bản này **chỉ kết nối khi điện thoại và máy tính cùng Wi-Fi hoặc cùng hotspot**.
+
+- Không dùng STUN/TURN, bỏ mọi đường đi qua Internet; video và tệp đi thẳng giữa 2 máy.
+- Vẫn dùng Firebase để 2 máy tìm thấy nhau, nên mạng vẫn cần có Internet (4G của máy phát hotspot cũng được).
+- Khác mạng sẽ không lên hình (đúng chủ ý).
+- Muốn trở lại như cũ (cả khi khác mạng): đổi `LAN_ONLY = false` (file JS/HTML) hoặc `LanOnly.ENABLED = false` (`webrtc/LanOnly.kt`).
+- Lần đầu mở trên Windows, hãy bấm **Cho phép (Allow)** ở hộp thoại Tường lửa cho mạng riêng.
+- Nếu Wi-Fi công cộng bật "cách ly thiết bị", hãy dùng hotspot riêng.

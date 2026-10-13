@@ -59,7 +59,7 @@ private const val HEARTBEAT_INTERVAL_MS = 5000L
 private const val DISCONNECT_GRACE_MS = 8000L
 
 /** ICE servers dùng STUN công khai của Google + TURN dự phòng nếu 2 máy khác mạng LAN. */
-private val ICE_SERVERS = listOf(
+private val ICE_SERVERS: List<PeerConnection.IceServer> = if (LanOnly.ENABLED) emptyList() else listOf(
     PeerConnection.IceServer.builder("stun:stun.l.google.com:19302").createIceServer(),
     PeerConnection.IceServer.builder("stun:stun1.l.google.com:19302").createIceServer(),
     PeerConnection.IceServer.builder("stun:stun2.l.google.com:19302").createIceServer(),
@@ -206,6 +206,7 @@ class PeerConnectionManager(
 
         peerConnection = factory.createPeerConnection(rtcConfig, object : PeerConnection.Observer {
             override fun onIceCandidate(candidate: IceCandidate) {
+                if (LanOnly.ENABLED && !LanOnly.isLanCandidate(candidate.sdp)) return
                 signalingClient.sendIceCandidate(
                     candidate.sdpMid, candidate.sdpMLineIndex, candidate.sdp
                 )
@@ -362,6 +363,7 @@ class PeerConnectionManager(
     }
 
     fun addIceCandidate(sdpMid: String, sdpMLineIndex: Int, candidate: String) {
+        if (LanOnly.ENABLED && !LanOnly.isLanCandidate(candidate)) return
         peerConnection?.addIceCandidate(IceCandidate(sdpMid, sdpMLineIndex, candidate))
     }
 
