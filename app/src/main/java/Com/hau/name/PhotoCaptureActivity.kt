@@ -215,9 +215,6 @@ class PhotoCaptureActivity : AppCompatActivity() {
             layoutTopControls.updateLayoutParams<ConstraintLayout.LayoutParams> {
                 topMargin = baseTopMargin + bars.top
             }
-            layoutConnectionStatus.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                topMargin = baseTopMargin + bars.top
-            }
             // Khung nhap chu nam sat day; khi ban phim hien thi thi day len tren ban phim
             // (khung chup tu thu nho lai), khi khong co ban phim thi tru chieu cao thanh dieu huong.
             panel.updateLayoutParams<ConstraintLayout.LayoutParams> {
