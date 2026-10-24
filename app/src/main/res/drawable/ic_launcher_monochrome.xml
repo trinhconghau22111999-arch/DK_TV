@@ -1,10 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-    Lớp đơn sắc cho "Themed icon" (Android 13+ - Material You): hệ thống tự tô icon này theo màu
-    chủ đề (wallpaper) người dùng chọn, nên CHỈ được vẽ 1 màu phẳng duy nhất (không dùng nhiều
-    màu như ic_launcher_foreground.xml) - ghép thân camera + ô ngắm + ống kính + chấm ghi thành
-    1 khối silhouette duy nhất.
--->
+<!-- Lop don sac cho Themed icon (Android 13+): than may + o ngam, ong kinh khoet rong (evenOdd) -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
@@ -12,12 +7,8 @@
     android:viewportHeight="108">
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M46,36 L62,36 A2,2 0 0,1 64,38 L64,44 L44,44 L44,38 A2,2 0 0,1 46,36 Z
-                          M36,44 L78,44 A4,4 0 0,1 82,48 L82,72 A4,4 0 0,1 78,76 L36,76 A4,4 0 0,1 32,72 L32,48 A4,4 0 0,1 36,44 Z
-                          M70,50 A4,4 0 1,0 78,50 A4,4 0 1,0 70,50 Z" />
-    <!-- Vòng ống kính vẽ thêm (cùng màu, không có viền phân biệt vì đây là silhouette 1 màu)
-         để hình vẫn đọc được là camera thay vì chỉ 1 khối bo góc chung chung. -->
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M41,60 A13,13 0 1,0 67,60 A13,13 0 1,0 41,60 Z" />
+        android:fillType="evenOdd"
+        android:pathData="M44,37 L64,37 A2,2 0 0,1 66,39 L66,44 L78,44 A4,4 0 0,1 82,48 L82,72 A4,4 0 0,1 78,76 L36,76 A4,4 0 0,1 32,72 L32,48 A4,4 0 0,1 36,44 L42,44 L42,39 A2,2 0 0,1 44,37 Z
+                          M41,61 A13,13 0 1,0 67,61 A13,13 0 1,0 41,61 Z
+                          M46,61 A8,8 0 1,1 62,61 A8,8 0 1,1 46,61 Z" />
 </vector>

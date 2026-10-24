@@ -2,7 +2,7 @@
 <resources>
     <!-- Nền icon app: xanh dương đậm - gợi liên tưởng "công nghệ/tin cậy", phù hợp cho app
          an ninh/giám sát gia đình. -->
-    <color name="ic_launcher_background">#1B3A70</color>
+    <color name="ic_launcher_background">#0B0B0D</color>
     <!-- Vòng kính ống kính camera - xanh dương sáng hơn để tạo chiều sâu, nổi bật trên nền -->
     <color name="ic_launcher_lens">#4C8DFF</color>
     <!-- Chấm đỏ "đang ghi/đang trực tiếp" ở góc camera - đỏ nổi bật, đúng quy ước phổ biến
