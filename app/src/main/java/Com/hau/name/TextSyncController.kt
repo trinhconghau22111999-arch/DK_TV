@@ -27,8 +27,8 @@ class TextSyncController(
     private val activity: AppCompatActivity,
     private val editInput: EditText,
     private val textStatus: TextView,
-    btnPaste: Button,
-    btnClearBox: Button
+    private val btnPaste: Button,
+    private val btnClearBox: Button
 ) {
     private val executor = Executors.newSingleThreadExecutor()
     private val uiHandler = Handler(Looper.getMainLooper())
@@ -52,7 +52,28 @@ class TextSyncController(
         })
         btnPaste.setOnClickListener { pasteFromClipboard() }
         btnClearBox.setOnClickListener { clearBoxOnly() }
-        setStatus("Sẵn sàng")
+        setConnected(false)
+    }
+
+    /** Chi cho GO / DAN / XOA O khi da ket noi may tinh thanh cong; chua ket noi thi khoa o nhap
+     *  (chu da go truoc do van duoc giu va tu gui lai khi ket noi). */
+    fun setConnected(connected: Boolean) {
+        editInput.isEnabled = connected
+        btnPaste.isEnabled = connected
+        btnClearBox.isEnabled = connected
+        val a = if (connected) 1f else 0.4f
+        editInput.alpha = a
+        btnPaste.alpha = a
+        btnClearBox.alpha = a
+        editInput.hint = if (connected) "Gõ ở đây…" else "Chưa kết nối - chưa gõ được"
+        if (connected) {
+            setStatus("Sẵn sàng")
+        } else {
+            editInput.clearFocus()
+            val imm = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
+            imm.hideSoftInputFromWindow(editInput.windowToken, 0)
+            setStatus("Kết nối máy tính thành công mới gõ được")
+        }
     }
 
     private fun pasteFromClipboard() {

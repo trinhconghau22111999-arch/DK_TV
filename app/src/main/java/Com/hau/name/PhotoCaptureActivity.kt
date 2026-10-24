@@ -98,6 +98,7 @@ class PhotoCaptureActivity : AppCompatActivity() {
     private lateinit var textReviewHint: TextView
 
     private var textSync: TextSyncController? = null
+    private var connectedNow = false
 
     /** Ghi ngay gio len goc tren-trai anh chup (nho lai qua lan mo sau). */
     private var timestampOn = false
@@ -218,6 +219,7 @@ class PhotoCaptureActivity : AppCompatActivity() {
             findViewById<Button>(R.id.btn_paste),
             findViewById<Button>(R.id.btn_clear_box)
         )
+        textSync?.setConnected(connectedNow)
         btnSendFile.setOnClickListener {
             startActivity(Intent(this, SendFileActivity::class.java).apply {
                 putExtra(SendFileActivity.EXTRA_ROOM_CODE, roomCode)
@@ -264,6 +266,8 @@ class PhotoCaptureActivity : AppCompatActivity() {
      */
     private fun renderConnectionStatus(connectedCount: Int, maxViewers: Int) {
         val connected = connectedCount > 0
+        connectedNow = connected
+        textSync?.setConnected(connected)
         // Da ket noi thi AN ma 6 so (khong can nua); mat ket noi thi hien lai.
         textPairingCodeChip.visibility = if (connected) View.GONE else View.VISIBLE
         val color = if (connected) 0xFF4CAF50.toInt() else 0xFF9E9E9E.toInt()
