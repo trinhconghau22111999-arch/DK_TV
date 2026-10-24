@@ -221,6 +221,11 @@ class PhotoCaptureActivity : AppCompatActivity() {
         )
         textSync?.setConnected(connectedNow)
         btnSendFile.setOnClickListener {
+            // Chi vao trang Gui tep khi DANG ket noi may tinh.
+            if (!connectedNow) {
+                Toast.makeText(this, "Cần kết nối máy tính trước khi gửi tệp", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             startActivity(Intent(this, SendFileActivity::class.java).apply {
                 putExtra(SendFileActivity.EXTRA_ROOM_CODE, roomCode)
             })
@@ -267,6 +272,7 @@ class PhotoCaptureActivity : AppCompatActivity() {
     private fun renderConnectionStatus(connectedCount: Int, maxViewers: Int) {
         val connected = connectedCount > 0
         connectedNow = connected
+        btnSendFile.alpha = if (connected) 1f else 0.4f
         textSync?.setConnected(connected)
         // Da ket noi thi AN ma 6 so (khong can nua); mat ket noi thi hien lai.
         textPairingCodeChip.visibility = if (connected) View.GONE else View.VISIBLE
