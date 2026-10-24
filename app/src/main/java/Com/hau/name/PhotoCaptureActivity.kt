@@ -103,6 +103,16 @@ class PhotoCaptureActivity : AppCompatActivity() {
     /** Ghi ngay gio len goc tren-trai anh chup (nho lai qua lan mo sau). */
     private var timestampOn = false
     private lateinit var btnTimestamp: ImageView
+    private lateinit var textTimestampOverlay: TextView
+    private val clockHandler = Handler(Looper.getMainLooper())
+    private val clockFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+    private val clockRunnable = object : Runnable {
+        override fun run() {
+            if (!timestampOn) return
+            textTimestampOverlay.text = clockFormat.format(Date())
+            clockHandler.postDelayed(this, 1000L)
+        }
+    }
 
     /** Camera dang TAT (giu nut chup 3s de tat, giu 2s de mo lai). */
     private var cameraOff = false
@@ -196,6 +206,7 @@ class PhotoCaptureActivity : AppCompatActivity() {
         // + ngat ket noi (xem onBackPressed / exitAppAndDisconnect).
         textCameraOff = findViewById(R.id.text_camera_off)
         btnTimestamp = findViewById(R.id.btn_timestamp)
+        textTimestampOverlay = findViewById(R.id.text_timestamp_overlay)
         timestampOn = getSharedPreferences("truyentep", MODE_PRIVATE).getBoolean("timestamp_on", false)
         updateTimestampButton()
         btnTimestamp.setOnClickListener {
@@ -318,6 +329,7 @@ class PhotoCaptureActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         holdHandler.removeCallbacksAndMessages(null)
+        clockHandler.removeCallbacksAndMessages(null)
         textSync?.release()
         textSync = null
     }
@@ -380,11 +392,13 @@ class PhotoCaptureActivity : AppCompatActivity() {
             camera = null
             imageCapture = null
             previewView.visibility = View.INVISIBLE
+            textTimestampOverlay.visibility = View.GONE
             textCameraOff.visibility = View.VISIBLE
             Toast.makeText(this, "Đã tắt camera", Toast.LENGTH_SHORT).show()
         } else {
             textCameraOff.visibility = View.GONE
             previewView.visibility = View.VISIBLE
+            if (timestampOn) textTimestampOverlay.visibility = View.VISIBLE
             startCamera()
             Toast.makeText(this, "Đã mở camera", Toast.LENGTH_SHORT).show()
         }
@@ -578,6 +592,13 @@ class PhotoCaptureActivity : AppCompatActivity() {
 
     /** BAT -> icon mau cam, TAT -> icon trang mo. */
     private fun updateTimestampButton() {
+        clockHandler.removeCallbacks(clockRunnable)
+        if (timestampOn) {
+            textTimestampOverlay.visibility = if (cameraOff) View.GONE else View.VISIBLE
+            clockHandler.post(clockRunnable)
+        } else {
+            textTimestampOverlay.visibility = View.GONE
+        }
         if (timestampOn) {
             btnTimestamp.setColorFilter(0xFFFF6B00.toInt())
             btnTimestamp.alpha = 1f

@@ -116,6 +116,28 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- Ngay gio TRUC TIEP o goc tren-trai khung chup - hien khi bat ghi ngay gio (giong chu se
+         duoc ghi len anh). Nam duoi man xem lai anh nen khong de len anh xem lai. -->
+    <TextView
+        android:id="@+id/text_timestamp_overlay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        android:fontFamily="monospace"
+        android:includeFontPadding="false"
+        android:shadowColor="#000000"
+        android:shadowDx="0"
+        android:shadowDy="0"
+        android:shadowRadius="4"
+        android:textColor="#FF9800"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="@id/camera_preview"
+        app:layout_constraintTop_toTopOf="@id/camera_preview"
+        tools:text="2026-10-24 14:21:05" />
+
     <!-- Hien khi camera bi TAT (giu nut chup 3s) -->
     <TextView
         android:id="@+id/text_camera_off"
