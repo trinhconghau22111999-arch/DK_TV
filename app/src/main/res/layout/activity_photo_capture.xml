@@ -9,69 +9,21 @@
     android:background="#000000"
     android:fitsSystemWindows="false">
 
-    <!-- Man hinh chup anh gio phong to CHIEM TRON MAN HINH (tran vien tren-duoi),
-         khong con 2 vien den nhu truoc nua - guide dat dung 0%/100% de tan dung het
-         chieu cao vung noi dung cua Activity. -->
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guide_capture_top"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guide_capture_bottom"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="1" />
-
-    <!-- Khung camera - gio gioi han trong doan giua man hinh, khong con phu kin toan man.
-         scaleType="fitCenter" (thay vi mac dinh fillCenter) de HIEN DUNG NGUYEN KHUNG HINH,
-         KHONG zoom/crop mat canh - neu ti le khung hinh camera hep hon man hinh thi tu dong
-         chua 2 vien den (letterbox) o HAI BEN TRAI/PHAI thay vi phong to cat hinh. -->
-    <androidx.camera.view.PreviewView
-        android:id="@+id/camera_preview"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:scaleType="fitCenter"
-        app:layout_constraintTop_toTopOf="@id/guide_capture_top"
-        app:layout_constraintBottom_toBottomOf="@id/guide_capture_bottom"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <!-- Sony: lop phu toi dan o mep tren/duoi de chu va nut luon ro tren moi nen (chi la trang tri, khong bat cham) -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="112dp"
-        android:background="@drawable/bg_scrim_top"
-        app:layout_constraintTop_toTopOf="@id/guide_capture_top"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:background="@drawable/bg_scrim_bottom"
-        app:layout_constraintBottom_toBottomOf="@id/guide_capture_bottom"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <!-- Trang thai ket noi - GOC TREN-TRAI man hinh chup anh, luon hien ro de nguoi dung
-         biet ngay may tinh da ket noi hay chua (khong can doan qua notification). Cham
-         tron (mau doi theo trang thai) + chu "Đã kết nối x/4" hoac "Chưa kết nối". -->
+    <!-- Hang tren: trang thai ket noi (trai) + ma ghep noi + Gui tep (phai).
+         Khung chup nam SAT ngay duoi hang nay. -->
     <LinearLayout
         android:id="@+id/layout_connection_status"
         android:layout_width="wrap_content"
         android:layout_height="34dp"
-        android:layout_margin="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
         android:background="@drawable/bg_pill_button"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingStart="12dp"
         android:paddingEnd="14dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/guide_capture_top">
+        app:layout_constraintTop_toTopOf="parent">
 
         <View
             android:id="@+id/dot_connection_status"
@@ -94,17 +46,16 @@
 
     </LinearLayout>
 
-    <!-- Chip ma ghep noi + nut "Gui tep" - nam san TRONG man hinh chup anh (goc
-         tren-phai), khong con la 1 man hinh rieng nua. -->
     <LinearLayout
         android:id="@+id/layout_top_controls"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/guide_capture_top">
+        app:layout_constraintTop_toTopOf="parent">
 
         <TextView
             android:id="@+id/text_pairing_code_chip"
@@ -145,47 +96,44 @@
 
     </LinearLayout>
 
-    <!-- Nut den flash - DA DOI len 1 hang, nam NGAY PHIA TREN hang nut duoi cung
-         (bottom_controls), van ghim gan canh phai man hinh nhu cu. Khoang cach voi
-         hang duoi rut gon (8dp thay vi 16dp) de 2 nut nam sat, can doi, khong bi
-         "troi" cao qua so voi hang nut chup/doi camera ben duoi. -->
-    <ImageView
-        android:id="@+id/btn_toggle_flash"
-        android:layout_width="44dp"
-        android:layout_height="44dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/bg_round_button"
-        android:clickable="true"
-        android:contentDescription="Bật/tắt đèn flash"
-        android:focusable="true"
-        android:padding="10dp"
-        android:src="@drawable/ic_flash_off"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/bottom_controls" />
+    <!-- Khung chup: dat SAT duoi 3 nut o hang tren, va tren khung nhap chu.
+         scaleType=fitCenter de hien dung nguyen khung hinh (khong zoom/crop). -->
+    <androidx.camera.view.PreviewView
+        android:id="@+id/camera_preview"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        app:scaleType="fitCenter"
+        app:layout_constraintTop_toBottomOf="@id/layout_top_controls"
+        app:layout_constraintBottom_toTopOf="@id/panel_text_input"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Hang nut duoi cung - doi tu LinearLayout sang ConstraintLayout de nut chup LUON
-         NAM CHINH GIUA man hinh (khong bi lech khi nut xem-anh-vua-chup dang an), va nut
-         flash LUON nam gan CANH PHAI (ghim theo canh man hinh, khong dinh sat nut chup) -
-         giong bo cuc quen thuoc cua cac app camera: xem-anh-vua-chup (trai) - chup (giua) -
-         flash (phai), on dinh du dang o trang thai nao.
-         SUA: nut flash da doi len 1 hang phia tren (xem @id/btn_toggle_flash o tren) -
-         vi tri cu (canh phai, ngang hang nut chup) gio la nut doi camera truoc/sau. -->
+    <!-- Lop phu toi dan o day khung chup de cac nut vuong luon ro tren moi nen -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:background="@drawable/bg_scrim_bottom"
+        app:layout_constraintBottom_toBottomOf="@id/camera_preview"
+        app:layout_constraintStart_toStartOf="@id/camera_preview"
+        app:layout_constraintEnd_toEndOf="@id/camera_preview" />
+
+    <!-- Hang nut NAM TRONG khung chup: flash (trai) - chup (giua) - doi camera (phai).
+         Tat ca la nut VUONG. -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/bottom_controls"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        app:layout_constraintBottom_toBottomOf="@id/guide_capture_bottom"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        android:layout_marginBottom="12dp"
+        app:layout_constraintBottom_toBottomOf="@id/camera_preview"
+        app:layout_constraintEnd_toEndOf="@id/camera_preview"
+        app:layout_constraintStart_toStartOf="@id/camera_preview">
 
-        <!-- Nut chup - CHINH GIUA man hinh theo chieu ngang, khong phu thuoc cac nut khac -->
         <View
             android:id="@+id/btn_capture"
-            android:layout_width="76dp"
-            android:layout_height="76dp"
-            android:background="@drawable/bg_capture_button"
+            android:layout_width="68dp"
+            android:layout_height="68dp"
+            android:background="@drawable/bg_capture_square"
             android:clickable="true"
             android:contentDescription="Chụp ảnh"
             android:focusable="true"
@@ -194,31 +142,28 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent" />
 
-        <!-- Nut mo man hinh NHAP CHU sang may tinh - o goc duoi-trai (vi tri cu cua nut xem anh) -->
-        <TextView
-            android:id="@+id/btn_open_text_input"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginStart="24dp"
-            android:background="@drawable/bg_round_keyboard"
+        <ImageView
+            android:id="@+id/btn_toggle_flash"
+            android:layout_width="46dp"
+            android:layout_height="46dp"
+            android:layout_marginStart="16dp"
+            android:background="@drawable/bg_square_button"
             android:clickable="true"
-            android:contentDescription="Nhập chữ sang máy tính"
+            android:contentDescription="Bật/tắt đèn flash"
             android:focusable="true"
-            android:gravity="center"
-            android:includeFontPadding="false"
-            android:text="@string/btn_text_input"
-            android:textSize="22sp"
+            android:padding="11dp"
+            android:src="@drawable/ic_flash_off"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@id/btn_capture"
             app:layout_constraintBottom_toBottomOf="@id/btn_capture" />
 
-        <!-- CHI hien sau khi da chup it nhat 1 tam trong phien nay - nam canh nut nhap chu -->
+        <!-- CHI hien sau khi da chup it nhat 1 tam trong phien nay - nam canh nut flash -->
         <ImageView
             android:id="@+id/btn_view_last_photo"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginStart="84dp"
-            android:background="@drawable/bg_round_button"
+            android:layout_width="46dp"
+            android:layout_height="46dp"
+            android:layout_marginStart="70dp"
+            android:background="@drawable/bg_square_button"
             android:clickable="true"
             android:contentDescription="Xem ảnh vừa chụp"
             android:focusable="true"
@@ -228,18 +173,16 @@
             app:layout_constraintTop_toTopOf="@id/btn_capture"
             app:layout_constraintBottom_toBottomOf="@id/btn_capture" />
 
-        <!-- Nut doi camera truoc/sau - o DUNG VI TRI CU cua nut flash (gan canh phai,
-             ngang hang nut chup). -->
         <ImageView
             android:id="@+id/btn_switch_camera"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:layout_marginEnd="24dp"
-            android:background="@drawable/bg_round_button"
+            android:layout_width="46dp"
+            android:layout_height="46dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/bg_square_button"
             android:clickable="true"
             android:contentDescription="Đổi camera trước/sau"
             android:focusable="true"
-            android:padding="10dp"
+            android:padding="11dp"
             android:src="@drawable/ic_camera_switch"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/btn_capture"
@@ -247,20 +190,17 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Man hinh xem lai anh vua chup (hien ngay sau khi chup), cung nam o doan giua
-         man hinh giong khung ngam. Khong con nut X - cham 1 lan vao anh (hoac bam Back)
-         se dong lai khong gui; vuot 2 ngon tay tu duoi len tren anh nay se gui anh sang
-         may tinh - xem PhotoCaptureActivity cho logic cu the. -->
+    <!-- Man hinh xem lai anh vua chup: phu dung len khung chup -->
     <FrameLayout
         android:id="@+id/layout_photo_review"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="#000000"
         android:visibility="gone"
-        app:layout_constraintTop_toTopOf="@id/guide_capture_top"
-        app:layout_constraintBottom_toBottomOf="@id/guide_capture_bottom"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toTopOf="@id/camera_preview"
+        app:layout_constraintBottom_toBottomOf="@id/camera_preview"
+        app:layout_constraintStart_toStartOf="@id/camera_preview"
+        app:layout_constraintEnd_toEndOf="@id/camera_preview">
 
         <ImageView
             android:id="@+id/image_review_photo"
@@ -287,5 +227,93 @@
             android:textSize="12sp" />
 
     </FrameLayout>
+
+    <!-- NHAP CHU sang may tinh - nam DUOI khung chup (truoc la man hinh rieng) -->
+    <LinearLayout
+        android:id="@+id/panel_text_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/sony_surface"
+        android:orientation="vertical"
+        android:paddingStart="16dp"
+        android:paddingTop="10dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
+            android:text="@string/text_input_title"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/text_input_hint_top"
+            android:textColor="#B0B0B0"
+            android:textSize="12sp" />
+
+        <!-- CHI hien 1 dong (tu cuon theo con tro); van ban that van duoc giu day du va gui nguyen ven -->
+        <EditText
+            android:id="@+id/edit_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_input_field"
+            android:gravity="top|start"
+            android:hint="Gõ ở đây…"
+            android:inputType="textMultiLine|textNoSuggestions"
+            android:maxLines="1"
+            android:padding="12dp"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#707070"
+            android:textSize="18sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_paste"
+                style="@style/Widget.Sony.Button.Outline"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:text="Dán" />
+
+            <Button
+                android:id="@+id/btn_clear_box"
+                style="@style/Widget.Sony.Button.Outline"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Xoá ô" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/text_input_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="#9E9E9E"
+            android:textSize="12sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="“Xoá ô” chỉ làm trống ô nhập trên điện thoại (không xoá chữ đã nhập trên web) - dùng khi bạn đổi sang ô khác trên máy tính."
+            android:textColor="#707070"
+            android:textSize="11sp" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

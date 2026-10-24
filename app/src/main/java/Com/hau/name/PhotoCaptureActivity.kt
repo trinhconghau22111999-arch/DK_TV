@@ -18,6 +18,8 @@ import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.View
 import android.view.animation.OvershootInterpolator
+import android.widget.Button
+import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
@@ -94,6 +96,8 @@ class PhotoCaptureActivity : AppCompatActivity() {
     private lateinit var layoutPhotoReview: FrameLayout
     private lateinit var imageReviewPhoto: ImageView
     private lateinit var textReviewHint: TextView
+
+    private var textSync: TextSyncController? = null
 
     private var camera: Camera? = null
     private var imageCapture: ImageCapture? = null
@@ -175,11 +179,13 @@ class PhotoCaptureActivity : AppCompatActivity() {
         btnFlash.setOnClickListener { toggleFlash() }
         btnSwitchCamera.setOnClickListener { toggleCamera() }
         btnViewLastPhoto.setOnClickListener { openLastPhotoViewer() }
-        findViewById<View>(R.id.btn_open_text_input).setOnClickListener {
-            startActivity(Intent(this, TextInputActivity::class.java).apply {
-                putExtra(TextInputActivity.EXTRA_ROOM_CODE, roomCode)
-            })
-        }
+        textSync = TextSyncController(
+            this,
+            findViewById<EditText>(R.id.edit_input),
+            findViewById<TextView>(R.id.text_input_status),
+            findViewById<Button>(R.id.btn_paste),
+            findViewById<Button>(R.id.btn_clear_box)
+        )
         btnSendFile.setOnClickListener {
             startActivity(Intent(this, SendFileActivity::class.java).apply {
                 putExtra(SendFileActivity.EXTRA_ROOM_CODE, roomCode)
@@ -201,18 +207,21 @@ class PhotoCaptureActivity : AppCompatActivity() {
      *  de cac nut nay khong bi status bar (dong ho, pin...) hay navigation bar de len, trong
      *  khi khung camera (camera_preview) van tran het toan bo man hinh phia sau. */
     private fun setupEdgeToEdgeInsets() {
-        val baseTopMargin = (16 * resources.displayMetrics.density).toInt()
-        val baseBottomMargin = (16 * resources.displayMetrics.density).toInt()
+        val baseTopMargin = (8 * resources.displayMetrics.density).toInt()
+        val panel = findViewById<View>(R.id.panel_text_input)
         ViewCompat.setOnApplyWindowInsetsListener(rootLayout) { _, insets ->
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
             layoutTopControls.updateLayoutParams<ConstraintLayout.LayoutParams> {
                 topMargin = baseTopMargin + bars.top
             }
             layoutConnectionStatus.updateLayoutParams<ConstraintLayout.LayoutParams> {
                 topMargin = baseTopMargin + bars.top
             }
-            bottomControls.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                bottomMargin = baseBottomMargin + bars.bottom
+            // Khung nhap chu nam sat day; khi ban phim hien thi thi day len tren ban phim
+            // (khung chup tu thu nho lai), khi khong co ban phim thi tru chieu cao thanh dieu huong.
+            panel.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                bottomMargin = maxOf(bars.bottom, ime.bottom)
             }
             insets
         }
@@ -263,6 +272,12 @@ class PhotoCaptureActivity : AppCompatActivity() {
         // Dang ky NGAY khi man hinh hien ra de goc tren-trai luon phan anh dung trang thai -
         // service co the da chay tu truoc (vd. quay lai man hinh nay tu Recents).
         statusListenerHandler.post(registerStatusListenerRunnable)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        textSync?.release()
+        textSync = null
     }
 
     override fun onStop() {
