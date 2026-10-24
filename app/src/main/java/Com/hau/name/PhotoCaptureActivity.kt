@@ -205,6 +205,12 @@ class PhotoCaptureActivity : AppCompatActivity() {
         // truoc day). KHONG con nut thoat rieng - bam Back (nut he thong) se thoat han
         // + ngat ket noi (xem onBackPressed / exitAppAndDisconnect).
         textCameraOff = findViewById(R.id.text_camera_off)
+        // Nho trang thai TAT camera qua lan thoat/vao lai app (ke ca khi he thong tat han app).
+        cameraOff = getSharedPreferences("truyentep", MODE_PRIVATE).getBoolean("camera_off", false)
+        if (cameraOff) {
+            previewView.visibility = View.INVISIBLE
+            textCameraOff.visibility = View.VISIBLE
+        }
         btnTimestamp = findViewById(R.id.btn_timestamp)
         textTimestampOverlay = findViewById(R.id.text_timestamp_overlay)
         timestampOn = getSharedPreferences("truyentep", MODE_PRIVATE).getBoolean("timestamp_on", false)
@@ -383,6 +389,7 @@ class PhotoCaptureActivity : AppCompatActivity() {
     /** TAT: nha camera (unbind) va an khung ngam; MO: bind lai camera nhu luc moi vao. */
     private fun setCameraOff(off: Boolean) {
         cameraOff = off
+        getSharedPreferences("truyentep", MODE_PRIVATE).edit().putBoolean("camera_off", off).apply()
         if (off) {
             if (flashOn) {
                 flashOn = false
