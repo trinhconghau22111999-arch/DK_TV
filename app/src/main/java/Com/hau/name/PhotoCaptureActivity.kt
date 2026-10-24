@@ -99,6 +99,10 @@ class PhotoCaptureActivity : AppCompatActivity() {
 
     private var textSync: TextSyncController? = null
 
+    /** Ghi ngay gio len goc tren-trai anh chup (nho lai qua lan mo sau). */
+    private var timestampOn = false
+    private lateinit var btnTimestamp: ImageView
+
     /** Camera dang TAT (giu nut chup 3s de tat, giu 2s de mo lai). */
     private var cameraOff = false
     private lateinit var textCameraOff: TextView
@@ -190,6 +194,19 @@ class PhotoCaptureActivity : AppCompatActivity() {
         // truoc day). KHONG con nut thoat rieng - bam Back (nut he thong) se thoat han
         // + ngat ket noi (xem onBackPressed / exitAppAndDisconnect).
         textCameraOff = findViewById(R.id.text_camera_off)
+        btnTimestamp = findViewById(R.id.btn_timestamp)
+        timestampOn = getSharedPreferences("truyentep", MODE_PRIVATE).getBoolean("timestamp_on", false)
+        updateTimestampButton()
+        btnTimestamp.setOnClickListener {
+            timestampOn = !timestampOn
+            getSharedPreferences("truyentep", MODE_PRIVATE).edit().putBoolean("timestamp_on", timestampOn).apply()
+            updateTimestampButton()
+            Toast.makeText(
+                this,
+                if (timestampOn) "Ghi ngày giờ lên ảnh: BẬT" else "Ghi ngày giờ lên ảnh: TẮT",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
         setupCaptureButtonHold()
         btnFlash.setOnClickListener { toggleFlash() }
         btnSwitchCamera.setOnClickListener { toggleCamera() }
@@ -523,7 +540,21 @@ class PhotoCaptureActivity : AppCompatActivity() {
                     // hinh de xem lai, chi gui khi nguoi dung chu dong vuot 2 ngon len tren.
                     // Giai ma anh o luong nen + thu nho (setImageURI tren luong UI voi anh
                     // vai chuc MP lam may treo ~1-2s, keo theo mat ket noi luc bam chup).
-                    lastPhotoUri?.let { loadPhotoAsync(it) }
+                    val savedUri = lastPhotoUri
+                    if (savedUri != null) {
+                        if (timestampOn) {
+                            val takenAt = System.currentTimeMillis()
+                            // Ve ngay gio len anh o luong nen, xong moi hien anh xem lai.
+                            Thread {
+                                stampDateTimeOnPhoto(savedUri, takenAt)
+                                runOnUiThread {
+                                    if (!isFinishing && !isDestroyed) loadPhotoAsync(savedUri)
+                                }
+                            }.start()
+                        } else {
+                            loadPhotoAsync(savedUri)
+                        }
+                    }
                 }
 
                 override fun onError(exc: ImageCaptureException) {
@@ -533,6 +564,79 @@ class PhotoCaptureActivity : AppCompatActivity() {
                 }
             }
         )
+    }
+
+    /** BAT -> icon mau cam, TAT -> icon trang mo. */
+    private fun updateTimestampButton() {
+        if (timestampOn) {
+            btnTimestamp.setColorFilter(0xFFFF6B00.toInt())
+            btnTimestamp.alpha = 1f
+        } else {
+            btnTimestamp.clearColorFilter()
+            btnTimestamp.alpha = 0.55f
+        }
+    }
+
+    /** Ve "yyyy-MM-dd HH:mm:ss" vao goc TREN-TRAI anh da luu (theo chieu anh khi nhin dung) roi
+     *  ghi de lai file. Chay o luong nen. Doc EXIF de xoay/lat dung chieu truoc khi ve (file ghi
+     *  lai khong con EXIF xoay). Loi thi giu nguyen anh goc. */
+    private fun stampDateTimeOnPhoto(uri: Uri, takenAt: Long) {
+        try {
+            val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            contentResolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, bounds) }
+            if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return
+            var sample = 1
+            while ((bounds.outWidth.toLong() / sample) * (bounds.outHeight.toLong() / sample) > 16_000_000L) sample *= 2
+            val decoded = contentResolver.openInputStream(uri)?.use {
+                BitmapFactory.decodeStream(it, null, BitmapFactory.Options().apply { inSampleSize = sample })
+            } ?: return
+
+            val orientation = try {
+                contentResolver.openInputStream(uri)?.use {
+                    ExifInterface(it).getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+                } ?: ExifInterface.ORIENTATION_NORMAL
+            } catch (e: Exception) { ExifInterface.ORIENTATION_NORMAL }
+            val m = Matrix()
+            when (orientation) {
+                ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> m.postScale(-1f, 1f)
+                ExifInterface.ORIENTATION_ROTATE_180 -> m.postRotate(180f)
+                ExifInterface.ORIENTATION_FLIP_VERTICAL -> m.postScale(1f, -1f)
+                ExifInterface.ORIENTATION_TRANSPOSE -> { m.postRotate(90f); m.postScale(-1f, 1f) }
+                ExifInterface.ORIENTATION_ROTATE_90 -> m.postRotate(90f)
+                ExifInterface.ORIENTATION_TRANSVERSE -> { m.postRotate(270f); m.postScale(-1f, 1f) }
+                ExifInterface.ORIENTATION_ROTATE_270 -> m.postRotate(270f)
+                else -> {}
+            }
+            var bmp = if (m.isIdentity) decoded else
+                Bitmap.createBitmap(decoded, 0, 0, decoded.width, decoded.height, m, true)
+            if (!bmp.isMutable) bmp = bmp.copy(Bitmap.Config.ARGB_8888, true) ?: return
+
+            val text = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date(takenAt))
+            val shortEdge = minOf(bmp.width, bmp.height).toFloat()
+            val textSize = shortEdge * 0.04f
+            val margin = shortEdge * 0.025f
+            val canvas = android.graphics.Canvas(bmp)
+            val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+                this.textSize = textSize
+                typeface = android.graphics.Typeface.create(android.graphics.Typeface.MONOSPACE, android.graphics.Typeface.BOLD)
+            }
+            val x = margin
+            val y = margin + textSize
+            // Vien den cho de doc tren moi nen, roi chu cam len tren.
+            paint.style = android.graphics.Paint.Style.STROKE
+            paint.strokeWidth = textSize * 0.14f
+            paint.color = android.graphics.Color.BLACK
+            canvas.drawText(text, x, y, paint)
+            paint.style = android.graphics.Paint.Style.FILL
+            paint.color = 0xFFFF9800.toInt()
+            canvas.drawText(text, x, y, paint)
+
+            val out = java.io.ByteArrayOutputStream()
+            bmp.compress(Bitmap.CompressFormat.JPEG, 95, out)
+            contentResolver.openOutputStream(uri, "wt")?.use { it.write(out.toByteArray()) }
+        } catch (e: Throwable) {
+            // Giu nguyen anh goc neu khong ve duoc (vd. het bo nho).
+        }
     }
 
     /** Giai ma anh o luong nen voi inSampleSize (toi da ~1600px canh dai, doc EXIF xoay),
