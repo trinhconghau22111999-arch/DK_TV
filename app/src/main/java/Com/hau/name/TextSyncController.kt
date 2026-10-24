@@ -95,13 +95,13 @@ class TextSyncController(
     }
 
     /** Lam trong o nhap tren dien thoai, KHONG gui thao tac xoa nao sang may tinh. */
-    private fun clearBoxOnly() {
+    private fun clearBoxOnly(keepStatus: Boolean = false) {
         ignoreChanges = true
         editInput.setText("")
         ignoreChanges = false
         latestText = ""
         executor.execute { sentText = "" }
-        setStatus("Đã làm trống ô (chữ trên web giữ nguyên)")
+        if (!keepStatus) setStatus("Đã làm trống ô (chữ trên web giữ nguyên)")
     }
 
     private fun submitSync(target: String) {
@@ -127,6 +127,13 @@ class TextSyncController(
         if (sent > 0) {
             sentText = target
             setStatus("✓ Đã gửi (${target.length} ký tự)")
+            // Vua bam Enter (co xuong dong) va da gui xong -> tu lam trong o tren dien thoai
+            // (chu tren web giu nguyen). Chi xoa neu o chua bi go them trong luc gui.
+            if (target.contains('\n')) {
+                uiHandler.post {
+                    if (!released && editInput.text.toString() == target) clearBoxOnly(keepStatus = true)
+                }
+            }
         } else {
             setStatus("⏳ Chưa kết nối máy tính - sẽ tự gửi lại khi kết nối")
             scheduleRetry()
