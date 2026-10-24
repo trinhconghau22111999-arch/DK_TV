@@ -116,6 +116,22 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- Hien khi camera bi TAT (giu nut chup 3s) -->
+    <TextView
+        android:id="@+id/text_camera_off"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center"
+        android:text="Camera đã tắt\nGiữ nút chụp 2 giây để mở lại"
+        android:textColor="#A6A6AD"
+        android:textSize="14sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/camera_preview"
+        app:layout_constraintEnd_toEndOf="@id/camera_preview"
+        app:layout_constraintStart_toStartOf="@id/camera_preview"
+        app:layout_constraintTop_toTopOf="@id/camera_preview" />
+
     <!-- Lop phu toi dan o day khung chup de cac nut vuong luon ro tren moi nen -->
     <View
         android:layout_width="match_parent"

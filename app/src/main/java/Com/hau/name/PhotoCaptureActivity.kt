@@ -99,6 +99,20 @@ class PhotoCaptureActivity : AppCompatActivity() {
 
     private var textSync: TextSyncController? = null
 
+    /** Camera dang TAT (giu nut chup 3s de tat, giu 2s de mo lai). */
+    private var cameraOff = false
+    private lateinit var textCameraOff: TextView
+    private val holdHandler = Handler(Looper.getMainLooper())
+    private var holdTriggered = false
+    private var holdStartTime = 0L
+    private val holdToTurnOffMs = 3000L
+    private val holdToTurnOnMs = 2000L
+    private val holdRunnable = Runnable {
+        holdTriggered = true
+        btnCapture.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
+        setCameraOff(!cameraOff)
+    }
+
     private var camera: Camera? = null
     private var imageCapture: ImageCapture? = null
     private var flashOn = false
@@ -175,7 +189,8 @@ class PhotoCaptureActivity : AppCompatActivity() {
         // Man hinh nay gio la man hinh chinh duy nhat cua app (thay cho CameraActivity
         // truoc day). KHONG con nut thoat rieng - bam Back (nut he thong) se thoat han
         // + ngat ket noi (xem onBackPressed / exitAppAndDisconnect).
-        btnCapture.setOnClickListener { takePhoto() }
+        textCameraOff = findViewById(R.id.text_camera_off)
+        setupCaptureButtonHold()
         btnFlash.setOnClickListener { toggleFlash() }
         btnSwitchCamera.setOnClickListener { toggleCamera() }
         btnViewLastPhoto.setOnClickListener { openLastPhotoViewer() }
@@ -273,6 +288,7 @@ class PhotoCaptureActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        holdHandler.removeCallbacksAndMessages(null)
         textSync?.release()
         textSync = null
     }
@@ -283,7 +299,70 @@ class PhotoCaptureActivity : AppCompatActivity() {
         CameraStreamService.instance?.removeConnectionStatusListener(connectionStatusListener)
     }
 
+    /** Nut chup: bam NHANH = chup anh. Giu 3 giay (khi camera dang bat) = TAT camera; giu 2 giay
+     *  (khi camera dang tat) = MO lai camera. Giu giua chung (qua lau de la bam nhanh nhung chua
+     *  du gio) thi khong lam gi. Tha tay truoc khi du gio -> huy, khong tat/mo. */
+    @android.annotation.SuppressLint("ClickableViewAccessibility")
+    private fun setupCaptureButtonHold() {
+        btnCapture.setOnTouchListener { v, event ->
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    v.isPressed = true
+                    holdTriggered = false
+                    holdStartTime = android.os.SystemClock.uptimeMillis()
+                    holdHandler.postDelayed(
+                        holdRunnable,
+                        if (cameraOff) holdToTurnOnMs else holdToTurnOffMs
+                    )
+                    true
+                }
+                MotionEvent.ACTION_UP -> {
+                    v.isPressed = false
+                    holdHandler.removeCallbacks(holdRunnable)
+                    val held = android.os.SystemClock.uptimeMillis() - holdStartTime
+                    if (!holdTriggered) {
+                        if (cameraOff) {
+                            Toast.makeText(this, "Camera đang tắt - giữ nút chụp 2 giây để mở lại", Toast.LENGTH_SHORT).show()
+                        } else if (held < 600L) {
+                            takePhoto()
+                        }
+                    }
+                    true
+                }
+                MotionEvent.ACTION_CANCEL -> {
+                    v.isPressed = false
+                    holdHandler.removeCallbacks(holdRunnable)
+                    true
+                }
+                else -> true
+            }
+        }
+    }
+
+    /** TAT: nha camera (unbind) va an khung ngam; MO: bind lai camera nhu luc moi vao. */
+    private fun setCameraOff(off: Boolean) {
+        cameraOff = off
+        if (off) {
+            if (flashOn) {
+                flashOn = false
+                updateFlashButtonIcon()
+            }
+            cameraProvider?.unbindAll()
+            camera = null
+            imageCapture = null
+            previewView.visibility = View.INVISIBLE
+            textCameraOff.visibility = View.VISIBLE
+            Toast.makeText(this, "Đã tắt camera", Toast.LENGTH_SHORT).show()
+        } else {
+            textCameraOff.visibility = View.GONE
+            previewView.visibility = View.VISIBLE
+            startCamera()
+            Toast.makeText(this, "Đã mở camera", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     private fun startCamera() {
+        if (cameraOff) return
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
         cameraProviderFuture.addListener({
             val provider = cameraProviderFuture.get()
@@ -353,6 +432,7 @@ class PhotoCaptureActivity : AppCompatActivity() {
      *  activity_photo_capture.xml). Kiem tra may co camera do khong truoc khi doi
      *  (mot so may chi co 1 camera) de tranh crash; neu khong co thi bao va giu nguyen. */
     private fun toggleCamera() {
+        if (cameraOff) return
         val provider = cameraProvider ?: return
         val nextSelector = if (currentCameraSelector == CameraSelector.DEFAULT_BACK_CAMERA) {
             CameraSelector.DEFAULT_FRONT_CAMERA
@@ -380,6 +460,7 @@ class PhotoCaptureActivity : AppCompatActivity() {
      *  Hieu ung bat/tat ro rang tren nut: BAT -> icon tia set mau vang; TAT -> icon tia set
      *  co GACH CHEO qua, mau trang mo. */
     private fun toggleFlash() {
+        if (cameraOff) return
         flashOn = !flashOn
         imageCapture?.flashMode = if (flashOn) ImageCapture.FLASH_MODE_ON else ImageCapture.FLASH_MODE_OFF
         val torchCamera = camera
