@@ -247,6 +247,8 @@ class PhotoCaptureActivity : AppCompatActivity() {
      */
     private fun renderConnectionStatus(connectedCount: Int, maxViewers: Int) {
         val connected = connectedCount > 0
+        // Da ket noi thi AN ma 6 so (khong can nua); mat ket noi thi hien lai.
+        textPairingCodeChip.visibility = if (connected) View.GONE else View.VISIBLE
         val color = if (connected) 0xFF4CAF50.toInt() else 0xFF9E9E9E.toInt()
         (dotConnectionStatus.background as? android.graphics.drawable.GradientDrawable)?.setColor(color)
             ?: dotConnectionStatus.background?.setTint(color)
