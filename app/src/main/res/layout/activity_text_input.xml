@@ -3,17 +3,17 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#121212"
+    android:background="@color/sony_surface"
     android:orientation="vertical"
     android:padding="20dp">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-medium"
         android:text="@string/text_input_title"
         android:textColor="#FFFFFF"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+        android:textSize="18sp" />
 
     <TextView
         android:layout_width="match_parent"
@@ -30,7 +30,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:background="#1E1E2E"
+        android:background="@drawable/bg_input_field"
         android:gravity="top|start"
         android:hint="Gõ ở đây…"
         android:inputType="textMultiLine|textNoSuggestions"
@@ -48,18 +48,20 @@
 
         <Button
             android:id="@+id/btn_paste"
+            style="@style/Widget.Sony.Button.Outline"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_weight="1"
-            android:text="📋 Dán" />
+            android:text="Dán" />
 
         <Button
             android:id="@+id/btn_clear_box"
+            style="@style/Widget.Sony.Button.Outline"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="🧹 Xoá ô" />
+            android:text="Xoá ô" />
     </LinearLayout>
 
     <TextView
@@ -85,6 +87,7 @@
 
     <Button
         android:id="@+id/btn_text_input_back"
+        style="@style/Widget.Sony.Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Xong" />

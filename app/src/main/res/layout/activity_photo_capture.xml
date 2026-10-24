@@ -40,13 +40,30 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- Sony: lop phu toi dan o mep tren/duoi de chu va nut luon ro tren moi nen (chi la trang tri, khong bat cham) -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="112dp"
+        android:background="@drawable/bg_scrim_top"
+        app:layout_constraintTop_toTopOf="@id/guide_capture_top"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:background="@drawable/bg_scrim_bottom"
+        app:layout_constraintBottom_toBottomOf="@id/guide_capture_bottom"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <!-- Trang thai ket noi - GOC TREN-TRAI man hinh chup anh, luon hien ro de nguoi dung
          biet ngay may tinh da ket noi hay chua (khong can doan qua notification). Cham
          tron (mau doi theo trang thai) + chu "Đã kết nối x/4" hoac "Chưa kết nối". -->
     <LinearLayout
         android:id="@+id/layout_connection_status"
         android:layout_width="wrap_content"
-        android:layout_height="40dp"
+        android:layout_height="34dp"
         android:layout_margin="16dp"
         android:background="@drawable/bg_pill_button"
         android:gravity="center_vertical"
@@ -58,8 +75,8 @@
 
         <View
             android:id="@+id/dot_connection_status"
-            android:layout_width="10dp"
-            android:layout_height="10dp"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
             android:layout_marginEnd="8dp"
             android:background="@drawable/bg_status_dot" />
 
@@ -67,10 +84,12 @@
             android:id="@+id/text_connection_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
             android:includeFontPadding="false"
+            android:letterSpacing="0.08"
+            android:textAllCaps="true"
             android:textColor="#FFFFFF"
-            android:textSize="13sp"
-            android:textStyle="bold"
+            android:textSize="11sp"
             tools:text="Chưa kết nối" />
 
     </LinearLayout>
@@ -90,37 +109,39 @@
         <TextView
             android:id="@+id/text_pairing_code_chip"
             android:layout_width="wrap_content"
-            android:layout_height="40dp"
+            android:layout_height="34dp"
             android:layout_marginEnd="8dp"
             android:background="@drawable/bg_pill_button"
+            android:fontFamily="sans-serif-medium"
             android:gravity="center"
             android:includeFontPadding="false"
             android:paddingStart="14dp"
             android:paddingEnd="14dp"
             android:textColor="#FFFFFF"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:letterSpacing="0.1"
+            android:textSize="13sp"
+            android:letterSpacing="0.14"
             tools:text="Mã: 320100" />
 
         <Button
             android:id="@+id/btn_send_file"
             style="?android:attr/borderlessButtonStyle"
             android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:background="@drawable/bg_pill_button"
+            android:layout_height="34dp"
+            android:background="@drawable/bg_pill_accent"
+            android:fontFamily="sans-serif-medium"
             android:gravity="center"
             android:includeFontPadding="false"
             android:insetTop="0dp"
             android:insetBottom="0dp"
+            android:letterSpacing="0.06"
             android:minWidth="0dp"
             android:minHeight="0dp"
             android:paddingStart="14dp"
             android:paddingEnd="14dp"
             android:text="@string/btn_send_file"
-            android:textAllCaps="false"
-            android:textColor="#FFFFFF"
-            android:textSize="14sp" />
+            android:textAllCaps="true"
+            android:textColor="#FF6B00"
+            android:textSize="12sp" />
 
     </LinearLayout>
 
@@ -162,8 +183,8 @@
         <!-- Nut chup - CHINH GIUA man hinh theo chieu ngang, khong phu thuoc cac nut khac -->
         <View
             android:id="@+id/btn_capture"
-            android:layout_width="72dp"
-            android:layout_height="72dp"
+            android:layout_width="76dp"
+            android:layout_height="76dp"
             android:background="@drawable/bg_capture_button"
             android:clickable="true"
             android:contentDescription="Chụp ảnh"
@@ -179,7 +200,7 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_marginStart="24dp"
-            android:background="@drawable/bg_round_button"
+            android:background="@drawable/bg_round_keyboard"
             android:clickable="true"
             android:contentDescription="Nhập chữ sang máy tính"
             android:focusable="true"
@@ -254,14 +275,16 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|center_horizontal"
             android:layout_marginBottom="40dp"
-            android:background="@drawable/bg_round_button"
+            android:background="@drawable/bg_pill_button"
+            android:fontFamily="sans-serif-medium"
+            android:letterSpacing="0.04"
             android:paddingStart="16dp"
             android:paddingTop="8dp"
             android:paddingEnd="16dp"
             android:paddingBottom="8dp"
             android:text="@string/hint_swipe_up_to_send"
             android:textColor="#FFFFFF"
-            android:textSize="13sp" />
+            android:textSize="12sp" />
 
     </FrameLayout>
 
