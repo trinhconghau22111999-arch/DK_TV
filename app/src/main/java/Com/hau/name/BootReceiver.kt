@@ -14,7 +14,7 @@ class BootReceiver : BroadcastReceiver() {
         val action = intent.action ?: return
         if (action != Intent.ACTION_BOOT_COMPLETED && action != Intent.ACTION_MY_PACKAGE_REPLACED) return
         val prefs = context.getSharedPreferences(CameraActivity.PREFS_NAME, Context.MODE_PRIVATE)
-        val code = prefs.getString(CameraActivity.KEY_FIXED_CODE, null) ?: return
+        val code = prefs.getString(CameraActivity.KEY_FIXED_CODE, null) ?: CameraActivity.FIXED_CODE
         if (!prefs.getBoolean(CameraActivity.KEY_SESSION_ACTIVE, false)) return
         val serviceIntent = Intent(context, CameraStreamService::class.java).apply {
             putExtra(CameraStreamService.EXTRA_ROOM_CODE, code)

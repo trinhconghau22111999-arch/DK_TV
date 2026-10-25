@@ -169,6 +169,19 @@ class CameraStreamService : Service() {
         return okCount
     }
 
+    /**
+     * Gui 1 lenh dieu khien (JSON da dung dinh dang {"type":"remote",...}) toi cac may
+     * TV dang ket noi. Chay tren luong goi (khong chay tren luong UI). @return so may nhan duoc.
+     */
+    fun sendRemoteCommand(json: String): Int {
+        var ok = 0
+        for (conn in viewerConns.values.toList()) {
+            val pcm = conn.peerConnectionManager ?: continue
+            if (pcm.sendJsonMessage(json)) ok++
+        }
+        return ok
+    }
+
     /** Tach chuoi thanh cac doan <= [maxLen] ky tu, khong cat doi cap ky tu thay the (emoji). */
     private fun splitTextForSending(text: String, maxLen: Int): List<String> {
         if (text.length <= maxLen) return listOf(text)

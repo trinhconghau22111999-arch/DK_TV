@@ -37,10 +37,8 @@ class CameraActivity : AppCompatActivity() {
     }
 
     private fun requestCameraPermissionThenStart() {
+        // Remote dieu khien TV: KHONG dung camera nua -> khong xin quyen CAMERA, chi xin THONG BAO.
         val needed = mutableListOf<String>()
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-            != PackageManager.PERMISSION_GRANTED
-        ) needed += Manifest.permission.CAMERA
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
             != PackageManager.PERMISSION_GRANTED
@@ -58,14 +56,8 @@ class CameraActivity : AppCompatActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode != REQUEST_CODE_PERMISSIONS) return
-        val cameraIndex = permissions.indexOf(Manifest.permission.CAMERA)
-        val cameraGranted = cameraIndex == -1 || grantResults.getOrNull(cameraIndex) == PackageManager.PERMISSION_GRANTED
-        if (cameraGranted) {
-            generatePairingCodeAndStartService()
-        } else {
-            Toast.makeText(this, "Cần quyền Camera để dùng máy này gửi ảnh/tệp", Toast.LENGTH_LONG).show()
-            finish()
-        }
+        // Tu choi quyen thong bao van chay duoc (chi mat thong bao dang chay nen).
+        generatePairingCodeAndStartService()
     }
 
     /**
@@ -77,11 +69,10 @@ class CameraActivity : AppCompatActivity() {
      */
     private fun generatePairingCodeAndStartService() {
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-        val code = prefs.getString(KEY_FIXED_CODE, null) ?: run {
-            val newCode = (100000..999999).random().toString()
-            prefs.edit().putString(KEY_FIXED_CODE, newCode).apply()
-            newCode
-        }
+        // Remote TV: LUON dung ma co dinh 123456 (khop TransferHost.CODE ben app TV).
+        // Ghi de ca ma ngau nhien cu da luu tu ban truoc.
+        val code = FIXED_CODE
+        prefs.edit().putString(KEY_FIXED_CODE, code).apply()
         roomCode = code
 
         val serviceIntent = Intent(this, CameraStreamService::class.java).apply {
@@ -111,15 +102,17 @@ class CameraActivity : AppCompatActivity() {
             .putBoolean(KEY_CONSENT_GIVEN, true)
             .apply()
 
-        startActivity(Intent(this, PhotoCaptureActivity::class.java).apply {
-            putExtra(PhotoCaptureActivity.EXTRA_ROOM_CODE, roomCode)
-        })
+        // Giao dien chup anh/gui tep cu (PhotoCaptureActivity) con trong code nhung bi AN -
+        // khong mo nua. Man hinh chinh gio la tay cam dieu khien TV.
+        startActivity(Intent(this, RemoteActivity::class.java))
         finish()
     }
 
     companion object {
         private const val REQUEST_CODE_PERMISSIONS = 2001
         const val PREFS_NAME = "home_camera"
+        /** Ma 6 so mac dinh, co dinh cho remote TV. */
+        const val FIXED_CODE = "123456"
         /** Mã ghép nối cố định của máy này — sinh 1 lần, dùng mãi mãi. */
         const val KEY_FIXED_CODE = "fixed_room_code"
         /** true khi phiên THỰC SỰ đang chạy — dùng bởi BootReceiver để tự khởi
