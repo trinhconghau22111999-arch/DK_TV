@@ -9,15 +9,15 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        // ID MOI (khac "qr.truyentep" cu) -> Android coi la 1 app hoan toan moi.
-        applicationId = "com.hau.truyentep"
+        // ID MOI (khac "com.hau.truyentep" cu) -> Android coi la 1 app hoan toan moi, o canh app cu.
+        applicationId = "com.hau.dktv"
         minSdk = 24
         targetSdk = 34
         // versionCode tang dan theo so lan build tren GitHub Actions -> ban sau luon
         // cao hon ban truoc, cai de len duoc (cap nhat) ma khong can go app cu.
         val runNumber = System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 1
-        versionCode = 100 + runNumber
-        versionName = "1.0.$runNumber"
+        versionCode = runNumber
+        versionName = "2.0.$runNumber"
     }
 
     // Ky bang 1 keystore CO DINH (lay tu GitHub Secrets) - bat buoc de cac ban build

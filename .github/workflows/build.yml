@@ -28,7 +28,7 @@ jobs:
           p = "app/google-services.json"
           d = json.load(open(p))
           for c in d.get("client", []):
-              c["client_info"]["android_client_info"]["package_name"] = "com.hau.truyentep"
+              c["client_info"]["android_client_info"]["package_name"] = "com.hau.dktv"
           json.dump(d, open(p, "w"), indent=2)
           PY
 
@@ -46,5 +46,5 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: truyentep-apk
+          name: dktv-apk
           path: app/build/outputs/apk/debug/app-debug.apk
