@@ -109,67 +109,6 @@ class CameraStreamService : Service() {
     }
 
     /**
-     * Goi tu PhotoCaptureActivity/SendFileActivity de gui 1 tep/anh sang TAT
-     * CA may xem hien dang ket noi thanh cong (co the co nhieu may tinh cung
-     * xem 1 luc, gui cho tat ca). May xem nao chua ket noi xong (dang thu
-     * lai) se KHONG nhan duoc lan gui nay - dung dung yeu cau "chi truyen
-     * khi ca 2 dang ket noi thanh cong".
-     *
-     * @param onProgress goi lai theo THOI GIAN THUC trong luc gui (0..100) -
-     *   PeerConnectionManager.sendFile() da tinh dung tien do theo tung doan
-     *   (chunk) roi, o day chi chuyen tiep len UI qua handler.post() (vi ham
-     *   nay chay tren Thread rieng, khong duoc dong UI truc tiep).
-     * @return so may xem THAT SU nhan duoc (da bat dau gui) - 0 nghia la
-     *   khong co may xem nao dang ket noi luc nay.
-     */
-    fun sendFileToAllViewers(
-        fileBytes: ByteArray, fileName: String, mimeType: String,
-        onProgress: (viewerId: String, percent: Int) -> Unit = { _, _ -> },
-        onAnyResult: (viewerId: String, success: Boolean) -> Unit = { _, _ -> }
-    ): Int {
-        var sentCount = 0
-        for ((viewerId, conn) in viewerConns) {
-            val pcm = conn.peerConnectionManager ?: continue
-            if (!pcm.isReadyToSendFile()) continue
-            sentCount++
-            Thread {
-                pcm.sendFile(fileBytes, fileName, mimeType,
-                    onProgress = { percent -> handler.post { onProgress(viewerId, percent) } },
-                    onResult = { success -> handler.post { onAnyResult(viewerId, success) } })
-            }.start()
-        }
-        return sentCount
-    }
-
-    /**
-     * Gui 1 thao tac sua van ban sang cac may tinh dang ket noi: XOA [del] ky tu ngay truoc
-     * con tro roi CHEN [ins] tai do (tinh nang nhap chu tu dien thoai). Van ban dai duoc
-     * tach thanh nhieu tin nho (gui lan luot, kenh DataChannel dam bao dung thu tu); chi tin
-     * dau mang [del]. @return so may tinh nhan DUNG DU - 0 nghia la chua gui duoc (chua ket
-     * noi/mat ket noi giua chung) -> noi goi se tu gui lai sau.
-     */
-    fun sendTextEditToAllViewers(del: Int, ins: String): Int {
-        val targets = viewerConns.values.mapNotNull { it.peerConnectionManager }
-            .filter { it.isReadyToSendFile() }
-        if (targets.isEmpty()) return 0
-        val chunks = splitTextForSending(ins, 3000)
-        var okCount = 0
-        for (pcm in targets) {
-            var allSent = true
-            for ((idx, part) in chunks.withIndex()) {
-                val json = org.json.JSONObject().apply {
-                    put("type", "text-edit")
-                    put("del", if (idx == 0) del else 0)
-                    put("ins", part)
-                }.toString()
-                if (!pcm.sendJsonMessage(json)) { allSent = false; break }
-            }
-            if (allSent) okCount++
-        }
-        return okCount
-    }
-
-    /**
      * Gui 1 lenh dieu khien (JSON da dung dinh dang {"type":"remote",...}) toi cac may
      * TV dang ket noi. Chay tren luong goi (khong chay tren luong UI). @return so may nhan duoc.
      */
@@ -180,20 +119,6 @@ class CameraStreamService : Service() {
             if (pcm.sendJsonMessage(json)) ok++
         }
         return ok
-    }
-
-    /** Tach chuoi thanh cac doan <= [maxLen] ky tu, khong cat doi cap ky tu thay the (emoji). */
-    private fun splitTextForSending(text: String, maxLen: Int): List<String> {
-        if (text.length <= maxLen) return listOf(text)
-        val out = mutableListOf<String>()
-        var i = 0
-        while (i < text.length) {
-            var end = minOf(i + maxLen, text.length)
-            if (end < text.length && Character.isHighSurrogate(text[end - 1])) end--
-            out.add(text.substring(i, end))
-            i = end
-        }
-        return out
     }
 
     /**
@@ -539,7 +464,7 @@ class CameraStreamService : Service() {
         private const val MAX_RECONNECT_DELAY_MS = 30_000L
 
         /** Tham chieu toi service dang chay (null neu chua bat/da dung) - de
-         *  PhotoCaptureActivity/SendFileActivity goi sendFileToAllViewers(). */
+         *  RemoteActivity dung de gui lenh. */
         @Volatile var instance: CameraStreamService? = null
             private set
     }

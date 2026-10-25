@@ -9,7 +9,6 @@ import android.graphics.RectF
 import android.graphics.Typeface
 import android.os.Handler
 import android.os.Looper
-import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
 import kotlin.math.abs
@@ -35,6 +34,11 @@ class IconButton(ctx: Context, private val kind: Int) : View(ctx) {
     }
 
     init { isClickable = true }
+
+    override fun onTouchEvent(e: MotionEvent): Boolean {
+        if (e.actionMasked == MotionEvent.ACTION_DOWN) Haptics.tick(this)
+        return super.onTouchEvent(e)
+    }
 
     override fun drawableStateChanged() { super.drawableStateChanged(); invalidate() }
 
@@ -95,7 +99,7 @@ class DPadView(ctx: Context, private val onKey: (String) -> Unit) : View(ctx) {
             MotionEvent.ACTION_DOWN -> {
                 val k = keyAt(e.x, e.y) ?: return false
                 down = k; invalidate()
-                performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                Haptics.tick(this)
                 onKey(k)
                 if (k != "ok") {
                     val r = object : Runnable { override fun run() { onKey(k); ui.postDelayed(this, 110) } }

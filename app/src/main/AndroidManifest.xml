@@ -3,18 +3,12 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-feature android:name="android.hardware.camera" android:required="false" />
-    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
-    <!-- Chi can cho Android 9 tro xuong (API < 29) de luu anh qua MediaStore -
-         tu Android 10 tro len (scoped storage) khong can quyen nay nua. -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
 
     <application
         android:allowBackup="false"
@@ -37,12 +31,6 @@
             android:name=".CameraActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
-        <activity
-            android:name=".PhotoCaptureActivity"
-            android:exported="false"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateHidden|adjustResize" />
-        <activity android:name=".SendFileActivity" android:exported="false" />
         <activity
             android:name=".RemoteActivity"
             android:exported="false"

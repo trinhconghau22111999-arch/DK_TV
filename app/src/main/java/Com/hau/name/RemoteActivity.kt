@@ -11,7 +11,6 @@ import android.os.Handler
 import android.os.Looper
 import android.speech.RecognizerIntent
 import android.view.Gravity
-import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
@@ -136,16 +135,14 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
 
         // Hang tren: tat man hinh + giong noi
         btnScreen = IconButton(this, IconButton.POWER).also {
-            it.setOnClickListener { v ->
-                v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+            it.setOnClickListener {
                 tvScreenOn = !tvScreenOn
                 send(JSONObject().put("action", "screen").put("on", tvScreenOn))
                 refreshScreenButton()
             }
         }
         val btnMic = IconButton(this, IconButton.MIC).also {
-            it.setOnClickListener { v ->
-                v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+            it.setOnClickListener {
                 startVoice()
             }
         }
@@ -222,7 +219,7 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
                 }
                 MotionEvent.ACTION_UP -> {
                     if (!moved && !multi && e.eventTime - downAt < TAP_MS) {
-                        pad.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                        Haptics.tick(pad)
                         send(JSONObject().put("action", "click"))
                     }
                 }
