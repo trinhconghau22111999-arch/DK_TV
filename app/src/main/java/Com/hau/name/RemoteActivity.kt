@@ -22,6 +22,7 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowInsetsControllerCompat
 import org.json.JSONObject
 import java.util.Locale
 import java.util.concurrent.Executors
@@ -48,7 +49,7 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
 
     private lateinit var statusDot: View
     private lateinit var statusText: TextView
-    private lateinit var btnScreen: TextView
+    private lateinit var btnScreen: View
 
     private var attachedService: CameraStreamService? = null
     private var connected = false
@@ -83,25 +84,58 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
 
     // ---------------------------------------------------------------- UI
 
+    /** Khung chu nhat bo goc: nen [fill], vien [strokeDp] mau den. */
+    private fun box(fill: Int, radiusDp: Int, strokeDp: Float) = GradientDrawable().apply {
+        setColor(fill); cornerRadius = dp(radiusDp).toFloat()
+        setStroke((strokeDp * resources.displayMetrics.density).toInt(), Color.BLACK)
+    }
+
+    private fun caption(t: String) = TextView(this).apply {
+        text = t; textSize = 10.5f; setTextColor(Color.BLACK); letterSpacing = 0.12f
+        typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL); gravity = Gravity.CENTER
+    }
+
+    private fun labeled(btn: View, label: String) = LinearLayout(this).apply {
+        orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER_HORIZONTAL
+        addView(btn, LinearLayout.LayoutParams(dp(78), dp(78)))
+        addView(caption(label), LinearLayout.LayoutParams(-2, -2).also { it.topMargin = dp(8) })
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     private fun buildUi(): View {
-        val root = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setBackgroundColor(Color.BLACK)
-            setPadding(dp(16), dp(20), dp(16), dp(20))
+        // Thanh he thong sang de hop nen trang
+        window.statusBarColor = Color.WHITE
+        window.navigationBarColor = Color.WHITE
+        WindowInsetsControllerCompat(window, window.decorView).apply {
+            isAppearanceLightStatusBars = true
+            isAppearanceLightNavigationBars = true
         }
 
-        // Thanh trang thai nho: cham xanh/do + chu
-        val statusRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
-        statusDot = View(this)
-        statusRow.addView(statusDot, LinearLayout.LayoutParams(dp(10), dp(10)).also { it.rightMargin = dp(8) })
-        statusText = TextView(this).apply { setTextColor(0xFFA6A6AD.toInt()); textSize = 13f }
-        statusRow.addView(statusText)
-        root.addView(statusRow, LinearLayout.LayoutParams(-1, -2))
+        val root = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setBackgroundColor(Color.WHITE)
+            setPadding(dp(20), dp(18), dp(20), dp(22))
+        }
 
-        // Hang tren: nut tat man hinh + mic
-        val top = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER }
-        btnScreen = circleButton("⏻", 0xFF3A1414.toInt(), 26f).also {
+        // Dau trang: ten (chu hoa, gian chu) + trang thai ket noi
+        val head = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
+        head.addView(TextView(this).apply {
+            text = "DK TV"; textSize = 15f; setTextColor(Color.BLACK); letterSpacing = 0.2f
+            typeface = Typeface.create("sans-serif-black", Typeface.BOLD)
+        }, LinearLayout.LayoutParams(0, -2, 1f))
+        statusText = TextView(this).apply {
+            setTextColor(Color.BLACK); textSize = 11.5f; letterSpacing = 0.04f
+            typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
+        }
+        statusDot = View(this)
+        head.addView(statusDot, LinearLayout.LayoutParams(dp(11), dp(11)).also { it.rightMargin = dp(8) })
+        head.addView(statusText)
+        root.addView(head, LinearLayout.LayoutParams(-1, -2))
+        root.addView(View(this).apply { setBackgroundColor(Color.BLACK) },
+            LinearLayout.LayoutParams(-1, dp(2)).also { it.topMargin = dp(12) })
+
+        // Hang tren: tat man hinh + giong noi
+        btnScreen = IconButton(this, IconButton.POWER).also {
             it.setOnClickListener { v ->
                 v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
                 tvScreenOn = !tvScreenOn
@@ -109,99 +143,35 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
                 refreshScreenButton()
             }
         }
-        val btnMic = circleButton("🎤", 0xFF14253A.toInt(), 26f).also {
+        val btnMic = IconButton(this, IconButton.MIC).also {
             it.setOnClickListener { v ->
                 v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
                 startVoice()
             }
         }
-        top.addView(btnScreen, LinearLayout.LayoutParams(dp(72), dp(72)).also { it.rightMargin = dp(40) })
-        top.addView(btnMic, LinearLayout.LayoutParams(dp(72), dp(72)))
-        root.addView(top, LinearLayout.LayoutParams(-1, -2).also { it.topMargin = dp(14) })
+        val top = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER }
+        top.addView(labeled(btnScreen, "TẮT MÀN HÌNH"), LinearLayout.LayoutParams(-2, -2).also { it.rightMargin = dp(36) })
+        top.addView(labeled(btnMic, "GIỌNG NÓI"), LinearLayout.LayoutParams(-2, -2))
+        root.addView(top, LinearLayout.LayoutParams(-1, -2).also { it.topMargin = dp(18) })
         refreshScreenButton()
 
-        // Chuot cam ung (chiem phan giua)
-        val pad = FrameLayout(this).apply { background = round(0xFF17171A.toInt(), 20) }
+        // Chuot cam ung: khung trang vien den
+        val pad = FrameLayout(this).apply { background = box(Color.WHITE, 24, 2.2f) }
         pad.addView(TextView(this).apply {
-            text = "Chuột cảm ứng\nTrượt: di chuyển · Chạm: nhấp · 2 ngón: cuộn"
-            setTextColor(0xFF6E6E75.toInt()); textSize = 13f; gravity = Gravity.CENTER
+            text = "CHUỘT CẢM ỨNG\nTrượt: di chuyển  ·  Chạm: nhấp  ·  2 ngón: cuộn"
+            setTextColor(0xFF6B6B6B.toInt()); textSize = 12f; gravity = Gravity.CENTER; setLineSpacing(0f, 1.4f)
         }, FrameLayout.LayoutParams(-1, -1))
         attachTouchpad(pad)
-        root.addView(pad, LinearLayout.LayoutParams(-1, 0, 1f).also { it.topMargin = dp(14); it.bottomMargin = dp(14) })
+        root.addView(pad, LinearLayout.LayoutParams(-1, 0, 1f).also { it.topMargin = dp(18); it.bottomMargin = dp(18) })
 
-        // Cum 5 nut: tren / duoi / trai / phai / OK o giua
-        val size = dp(76)
-        fun cell(v: View?) = FrameLayout(this).also { f ->
-            v?.let { f.addView(it, FrameLayout.LayoutParams(size, size, Gravity.CENTER)) }
-        }
-        fun row(a: View?, b: View?, c: View?) = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            addView(cell(a), LinearLayout.LayoutParams(0, size, 1f))
-            addView(cell(b), LinearLayout.LayoutParams(0, size, 1f))
-            addView(cell(c), LinearLayout.LayoutParams(0, size, 1f))
-        }
-        val up = keyButton("▲", "up", true)
-        val down = keyButton("▼", "down", true)
-        val left = keyButton("◀", "left", true)
-        val right = keyButton("▶", "right", true)
-        val ok = keyButton("OK", "ok", false).also {
-            it.background = round(0xFFFF6B00.toInt(), 0, oval = true)
-            it.setTextColor(Color.BLACK)
-        }
-        val dpad = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            addView(row(null, up, null), LinearLayout.LayoutParams(-1, size))
-            addView(row(left, ok, right), LinearLayout.LayoutParams(-1, size))
-            addView(row(null, down, null), LinearLayout.LayoutParams(-1, size))
-        }
-        root.addView(dpad, LinearLayout.LayoutParams(-1, -2).also { it.leftMargin = dp(24); it.rightMargin = dp(24) })
+        // Vong dieu huong 5 nut
+        val dpad = DPadView(this) { k -> send(JSONObject().put("action", "key").put("key", k)) }
+        root.addView(dpad, LinearLayout.LayoutParams(dp(250), dp(250)).also { it.gravity = Gravity.CENTER_HORIZONTAL })
         return root
     }
 
-    private fun circleButton(label: String, bg: Int, sp: Float) = TextView(this).apply {
-        text = label; textSize = sp; setTextColor(Color.WHITE); gravity = Gravity.CENTER
-        background = round(bg, 0, oval = true)
-        isClickable = true
-    }
-
-    private fun refreshScreenButton() {
-        btnScreen.background = round(if (tvScreenOn) 0xFF3A1414.toInt() else 0xFFB3261E.toInt(), 0, oval = true)
-        btnScreen.alpha = if (tvScreenOn) 1f else 0.95f
-    }
-
-    /** Nut mui ten/OK. [repeat]=true: giu de lap lai (cho 4 mui ten). */
-    @SuppressLint("ClickableViewAccessibility")
-    private fun keyButton(label: String, key: String, repeat: Boolean) = TextView(this).apply {
-        text = label; textSize = if (key == "ok") 20f else 22f
-        setTextColor(Color.WHITE); typeface = Typeface.DEFAULT_BOLD; gravity = Gravity.CENTER
-        background = round(0xFF26262B.toInt(), 0, oval = true)
-        val fire = { send(JSONObject().put("action", "key").put("key", key)) }
-        var repeater: Runnable? = null
-        setOnTouchListener { v, e ->
-            when (e.actionMasked) {
-                MotionEvent.ACTION_DOWN -> {
-                    v.isPressed = true
-                    v.alpha = 0.6f
-                    v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
-                    fire()
-                    if (repeat) {
-                        val r = object : Runnable { override fun run() { fire(); ui.postDelayed(this, 110) } }
-                        repeater = r
-                        ui.postDelayed(r, 380)
-                    }
-                    true
-                }
-                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    v.isPressed = false
-                    v.alpha = 1f
-                    repeater?.let { ui.removeCallbacks(it) }
-                    repeater = null
-                    true
-                }
-                else -> true
-            }
-        }
-    }
+    /** Nut tat man hinh dao mau (den, icon trang) khi TV dang tat. */
+    private fun refreshScreenButton() { (btnScreen as IconButton).inverted = !tvScreenOn }
 
     // ---------------------------------------------------------------- Touchpad
 
@@ -324,9 +294,13 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
 
     private fun setConnected(on: Boolean) {
         connected = on
-        statusDot.background = round(if (on) 0xFF3DDC84.toInt() else 0xFFFF5A5A.toInt(), 0, oval = true)
-        statusText.text = if (on) "Đã kết nối TV · Mã ${CameraActivity.FIXED_CODE}"
-        else "Chưa kết nối TV · Mã ${CameraActivity.FIXED_CODE}"
+        statusDot.background = GradientDrawable().apply {
+            shape = GradientDrawable.OVAL
+            setColor(if (on) 0xFF2BB673.toInt() else 0xFFE5322D.toInt())
+            setStroke(dp(1), Color.BLACK)
+        }
+        statusText.text = if (on) "ĐÃ KẾT NỐI · ${CameraActivity.FIXED_CODE}"
+        else "CHƯA KẾT NỐI · ${CameraActivity.FIXED_CODE}"
     }
 
     /** Service co the chua kip khoi dong luc mo man hinh: thu gan lai moi giay cho toi khi co. */
