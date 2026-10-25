@@ -299,8 +299,8 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
             setColor(if (on) 0xFF2BB673.toInt() else 0xFFE5322D.toInt())
             setStroke(dp(1), Color.BLACK)
         }
-        statusText.text = if (on) "ĐÃ KẾT NỐI · ${CameraActivity.FIXED_CODE}"
-        else "CHƯA KẾT NỐI · ${CameraActivity.FIXED_CODE}"
+        statusText.text = if (on) "ĐÃ KẾT NỐI"
+        else "CHƯA KẾT NỐI"
     }
 
     /** Service co the chua kip khoi dong luc mo man hinh: thu gan lai moi giay cho toi khi co. */
