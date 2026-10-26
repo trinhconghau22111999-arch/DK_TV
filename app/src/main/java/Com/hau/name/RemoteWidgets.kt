@@ -26,6 +26,9 @@ private const val ORANGE_DARK = 0xFFE05A00.toInt()
 class IconButton(ctx: Context, private val kind: Int) : View(ctx) {
     var inverted = false
         set(v) { field = v; invalidate() }
+    /** true: nen hinh chu nhat bo goc (icon van ve theo nua canh ngan), false: nen tron. */
+    var rect = false
+        set(v) { field = v; invalidate() }
 
     private val d = resources.displayMetrics.density
     private val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
@@ -46,9 +49,15 @@ class IconButton(ctx: Context, private val kind: Int) : View(ctx) {
         val cx = width / 2f; val cy = height / 2f
         val r = min(width, height) / 2f - 2f * d
         fill.color = if (inverted) INK else if (isPressed) PRESSED else PAPER
-        c.drawCircle(cx, cy, r, fill)
         line.color = INK; line.strokeWidth = 2.2f * d
-        c.drawCircle(cx, cy, r, line)
+        if (rect) {
+            val bg = RectF(2f * d, 2f * d, width - 2f * d, height - 2f * d)
+            c.drawRoundRect(bg, 12f * d, 12f * d, fill)
+            c.drawRoundRect(bg, 12f * d, 12f * d, line)
+        } else {
+            c.drawCircle(cx, cy, r, fill)
+            c.drawCircle(cx, cy, r, line)
+        }
 
         line.color = if (inverted) PAPER else INK
         line.strokeWidth = 3f * d

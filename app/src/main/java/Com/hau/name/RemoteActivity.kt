@@ -206,20 +206,28 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
         val q = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
         q.addView(caption("CHẤT LƯỢNG").also { it.gravity = Gravity.START }, LinearLayout.LayoutParams(dp(LABEL_W), -2))
         btnQ360 = qualityButton(360); btnQ720 = qualityButton(720)
-        q.addView(btnQ360, LinearLayout.LayoutParams(0, dp(38), 1f).also { it.rightMargin = dp(6) })
-        q.addView(btnQ720, LinearLayout.LayoutParams(0, dp(38), 1f).also { it.leftMargin = dp(6) })
+        val btnNext = TextView(this).apply {
+            text = "BÀI TIẾP"; textSize = 12f; gravity = Gravity.CENTER; letterSpacing = 0.02f
+            typeface = Typeface.create("sans-serif-black", Typeface.BOLD)
+            setTextColor(Color.BLACK); background = box(Color.WHITE, 12, 2.2f)
+            setOnClickListener { Haptics.tick(this); send(JSONObject().put("action", "media").put("cmd", "next")) }
+        }
+        // 3 nut cung hang, rong bang nhau: 360p | 720p | BÀI TIẾP
+        q.addView(btnQ360, LinearLayout.LayoutParams(0, dp(38), 1f).also { it.rightMargin = dp(4) })
+        q.addView(btnQ720, LinearLayout.LayoutParams(0, dp(38), 1f).also { it.leftMargin = dp(4); it.rightMargin = dp(4) })
+        q.addView(btnNext, LinearLayout.LayoutParams(0, dp(38), 1f).also { it.leftMargin = dp(4) })
         panel.addView(q, LinearLayout.LayoutParams(-1, -2).also { it.topMargin = dp(6) })
-        // Hang duoi cung: tua lui 10s, phat/dung (1 nut), tua toi 10s, bai/video ke tiep (nut nho, nhan 1 dong)
+        // Hang duoi cung: 3 nut chu nhat bo goc (khong nhan), rong bang nhau: lui 10s, phat/dung, tien 10s
         val media = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER }
-        fun mediaBtn(kind: Int, label: String, cmd: String) = labeled(
-            IconButton(this, kind).also { b -> b.setOnClickListener { send(JSONObject().put("action", "media").put("cmd", cmd)) } },
-            label, 40, true)
-        for (b in listOf(
-            mediaBtn(IconButton.REW, "LÙI 10s", "rew"),
-            mediaBtn(IconButton.PLAY, "PHÁT/DỪNG", "playpause"),
-            mediaBtn(IconButton.FWD, "TIẾN 10s", "fwd"),
-            mediaBtn(IconButton.NEXT, "BÀI TIẾP", "next"))) {
-            media.addView(b, LinearLayout.LayoutParams(0, -2, 1f))
+        fun mediaBtn(kind: Int, cmd: String) = IconButton(this, kind).also { b ->
+            b.rect = true
+            b.setOnClickListener { send(JSONObject().put("action", "media").put("cmd", cmd)) }
+        }
+        val mediaBtns = listOf(mediaBtn(IconButton.REW, "rew"), mediaBtn(IconButton.PLAY, "playpause"), mediaBtn(IconButton.FWD, "fwd"))
+        for ((i, b) in mediaBtns.withIndex()) {
+            media.addView(b, LinearLayout.LayoutParams(0, dp(44), 1f).also {
+                if (i > 0) it.leftMargin = dp(4); if (i < mediaBtns.size - 1) it.rightMargin = dp(4)
+            })
         }
         panel.addView(media, LinearLayout.LayoutParams(-1, -2).also { it.topMargin = dp(6) })
         root.addView(panel, LinearLayout.LayoutParams(-1, -2))
