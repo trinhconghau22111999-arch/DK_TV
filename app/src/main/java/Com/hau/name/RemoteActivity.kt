@@ -188,8 +188,8 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
 
         // Thay cho vong dieu huong cu: 2 thanh truot (am luong, do sang) + 2 nut chat luong video 360p / 720p
         val panel = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        panel.addView(sliderRow("ÂM LƯỢNG", "volume", 50), LinearLayout.LayoutParams(-1, dp(48)))
-        panel.addView(sliderRow("ĐỘ SÁNG", "brightness", 70), LinearLayout.LayoutParams(-1, dp(48)).also { it.topMargin = dp(2) })
+        panel.addView(sliderRow("ÂM LƯỢNG", "volume", 50), LinearLayout.LayoutParams(-1, dp(28)))
+        panel.addView(sliderRow("ĐỘ SÁNG", "brightness", 70), LinearLayout.LayoutParams(-1, dp(28)).also { it.topMargin = dp(2) })
         // Chat luong video: nhan ben trai + 2 nut cung 1 hang
         val q = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
         q.addView(caption("CHẤT LƯỢNG").also { it.gravity = Gravity.START }, LinearLayout.LayoutParams(dp(LABEL_W), -2))
@@ -227,7 +227,7 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
     private lateinit var btnQ720: TextView
     private var quality = 0
 
-    /** Thanh truot kieu Sony: duong day (cao 24dp) vien den, phan da keo to den, nut tron cam lon; 1 hang: nhan | thanh | so. */
+    /** Thanh truot kieu Sony: duong day (cao 12dp) vien den, phan da keo to den, nut tron cam lon; 1 hang: nhan | thanh | so. */
     private fun sliderRow(label: String, action: String, initial: Int): View = LinearLayout(this).apply {
         orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
         val value = TextView(this@RemoteActivity).apply {
@@ -235,7 +235,7 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
             typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
         }
         addView(caption(label).also { it.gravity = Gravity.START }, LinearLayout.LayoutParams(dp(LABEL_W), -2))
-        val trackH = dp(24)
+        val trackH = dp(12)
         val bg = GradientDrawable().apply {
             setColor(0xFFE6E6E6.toInt()); cornerRadius = trackH / 2f; setStroke(dp(2), Color.BLACK); setSize(-1, trackH)
         }
@@ -243,7 +243,7 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
         val layers = LayerDrawable(arrayOf<Drawable>(bg, ClipDrawable(fg, Gravity.START, ClipDrawable.HORIZONTAL)))
         layers.setId(0, android.R.id.background); layers.setId(1, android.R.id.progress)
         val knob = GradientDrawable().apply {
-            shape = GradientDrawable.OVAL; setColor(0xFFFF6B00.toInt()); setStroke(dp(2), Color.BLACK); setSize(dp(40), dp(40))
+            shape = GradientDrawable.OVAL; setColor(0xFFFF6B00.toInt()); setStroke(dp(2), Color.BLACK); setSize(dp(20), dp(20))
         }
         val sb = SeekBar(this@RemoteActivity).apply {
             max = 100; progress = initial
