@@ -3,12 +3,14 @@ package Com.hau.name
 import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.speech.RecognizerIntent
 import android.view.Gravity
 import android.view.MotionEvent
@@ -16,6 +18,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.LinearLayout
+import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -34,7 +37,8 @@ import kotlin.math.roundToInt
  *
  * Moi lenh la 1 tin JSON {"type":"remote","action":...} gui qua DataChannel truyen tep co san
  * (cung ma co dinh 123456, cung ket noi WebRTC/Firebase) toi app TV:
- *   - key    : key = up | down | left | right | ok
+ *   - volume / brightness : level = 0..100 (am luong / do sang man hinh TV)
+ *   - quality : q = 360 | 720 (chat luong video YouTube)
  *   - move   : dx, dy (chuot cam ung, di chuyen tuong doi)
  *   - click  : cham 1 lan tren touchpad
  *   - scroll : dy (2 ngon tay truot)
@@ -161,10 +165,80 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
         attachTouchpad(pad)
         root.addView(pad, LinearLayout.LayoutParams(-1, 0, 1f).also { it.topMargin = dp(18); it.bottomMargin = dp(18) })
 
-        // Vong dieu huong 5 nut
-        val dpad = DPadView(this) { k -> send(JSONObject().put("action", "key").put("key", k)) }
-        root.addView(dpad, LinearLayout.LayoutParams(dp(250), dp(250)).also { it.gravity = Gravity.CENTER_HORIZONTAL })
+        // Thay cho vong dieu huong cu: 2 thanh truot (am luong, do sang) + 2 nut chat luong video 360p / 720p
+        val panel = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        panel.addView(sliderRow("ÂM LƯỢNG", "volume", 50), LinearLayout.LayoutParams(-1, -2))
+        panel.addView(sliderRow("ĐỘ SÁNG", "brightness", 70), LinearLayout.LayoutParams(-1, -2).also { it.topMargin = dp(14) })
+        panel.addView(caption("CHẤT LƯỢNG VIDEO").also { it.gravity = Gravity.START },
+            LinearLayout.LayoutParams(-2, -2).also { it.topMargin = dp(18) })
+        val q = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        btnQ360 = qualityButton(360); btnQ720 = qualityButton(720)
+        q.addView(btnQ360, LinearLayout.LayoutParams(0, dp(52), 1f).also { it.rightMargin = dp(8) })
+        q.addView(btnQ720, LinearLayout.LayoutParams(0, dp(52), 1f).also { it.leftMargin = dp(8) })
+        panel.addView(q, LinearLayout.LayoutParams(-1, -2).also { it.topMargin = dp(8) })
+        root.addView(panel, LinearLayout.LayoutParams(-1, -2))
+        refreshQuality()
         return root
+    }
+
+    private lateinit var btnQ360: TextView
+    private lateinit var btnQ720: TextView
+    private var quality = 0
+
+    /** Thanh truot kieu Sony: duong den, nut tron cam; gui muc 0..100 toi TV (action = volume | brightness). */
+    private fun sliderRow(label: String, action: String, initial: Int): View = LinearLayout(this).apply {
+        orientation = LinearLayout.VERTICAL
+        val value = TextView(this@RemoteActivity).apply {
+            text = "$initial"; textSize = 11.5f; setTextColor(Color.BLACK)
+            typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
+        }
+        val head = LinearLayout(this@RemoteActivity).apply { orientation = LinearLayout.HORIZONTAL }
+        head.addView(caption(label).also { it.gravity = Gravity.START }, LinearLayout.LayoutParams(0, -2, 1f))
+        head.addView(value)
+        addView(head, LinearLayout.LayoutParams(-1, -2))
+        val sb = SeekBar(this@RemoteActivity).apply {
+            max = 100; progress = initial
+            progressTintList = ColorStateList.valueOf(Color.BLACK)
+            progressBackgroundTintList = ColorStateList.valueOf(0xFFBDBDBD.toInt())
+            thumbTintList = ColorStateList.valueOf(0xFFFF6B00.toInt())
+            var last = 0L
+            setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(s: SeekBar, p: Int, fromUser: Boolean) {
+                    value.text = "$p"
+                    if (!fromUser) return
+                    val now = SystemClock.uptimeMillis()
+                    if (now - last >= 80) {
+                        last = now
+                        send(JSONObject().put("action", action).put("level", p), warn = false)
+                    }
+                }
+                override fun onStartTrackingTouch(s: SeekBar) {}
+                override fun onStopTrackingTouch(s: SeekBar) {
+                    send(JSONObject().put("action", action).put("level", s.progress))
+                }
+            })
+        }
+        addView(sb, LinearLayout.LayoutParams(-1, dp(40)).also { it.topMargin = dp(2) })
+    }
+
+    private fun qualityButton(q: Int) = TextView(this).apply {
+        text = "${q}p"; textSize = 16f; gravity = Gravity.CENTER; letterSpacing = 0.06f
+        typeface = Typeface.create("sans-serif-black", Typeface.BOLD)
+        setOnClickListener {
+            Haptics.tick(this)
+            quality = q
+            refreshQuality()
+            send(JSONObject().put("action", "quality").put("q", q))
+        }
+    }
+
+    /** Nut dang chon: nen den chu trang; nut con lai: nen trang vien den chu den. */
+    private fun refreshQuality() {
+        for ((b, q) in listOf(btnQ360 to 360, btnQ720 to 720)) {
+            val on = quality == q
+            b.background = box(if (on) Color.BLACK else Color.WHITE, 14, 2.2f)
+            b.setTextColor(if (on) Color.WHITE else Color.BLACK)
+        }
     }
 
     /** Nut tat man hinh dao mau (den, icon trang) khi TV dang tat. */
