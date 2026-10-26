@@ -185,7 +185,7 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
             setTextColor(0xFF6B6B6B.toInt()); textSize = 12f; gravity = Gravity.CENTER; setLineSpacing(0f, 1.4f)
         }, FrameLayout.LayoutParams(-1, -1))
         attachTouchpad(pad)
-        root.addView(pad, LinearLayout.LayoutParams(-1, 0, 1f).also { it.topMargin = dp(8); it.bottomMargin = dp(4) })
+        root.addView(pad, LinearLayout.LayoutParams(-1, 0, 1f).also { it.topMargin = dp(8); it.bottomMargin = dp(8) })
 
         // Thay cho vong dieu huong cu: 2 thanh truot (am luong, do sang) + 2 nut chat luong video 360p / 720p
         val panel = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
@@ -217,7 +217,7 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
         q.addView(btnQ360, LinearLayout.LayoutParams(0, dp(38), 1f).also { it.rightMargin = dp(4) })
         q.addView(btnQ720, LinearLayout.LayoutParams(0, dp(38), 1f).also { it.leftMargin = dp(4); it.rightMargin = dp(4) })
         q.addView(btnNext, LinearLayout.LayoutParams(0, dp(38), 1f).also { it.leftMargin = dp(4) })
-        panel.addView(q, LinearLayout.LayoutParams(-1, -2).also { it.topMargin = dp(6) })
+        panel.addView(q, LinearLayout.LayoutParams(-1, -2).also { it.topMargin = dp(12) })
         // Hang duoi cung: 3 nut chu nhat bo goc (khong nhan), rong bang nhau: lui 10s, phat/dung, tien 10s
         val media = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER }
         fun mediaBtn(kind: Int, cmd: String) = IconButton(this, kind).also { b ->
@@ -230,7 +230,7 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
                 if (i > 0) it.leftMargin = dp(4); if (i < mediaBtns.size - 1) it.rightMargin = dp(4)
             })
         }
-        panel.addView(media, LinearLayout.LayoutParams(-1, -2).also { it.topMargin = dp(6) })
+        panel.addView(media, LinearLayout.LayoutParams(-1, -2).also { it.topMargin = dp(12) })
         root.addView(panel, LinearLayout.LayoutParams(-1, -2))
         refreshQuality()
         return root
