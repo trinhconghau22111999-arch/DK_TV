@@ -39,6 +39,7 @@ import kotlin.math.roundToInt
  * (cung ma co dinh 123456, cung ket noi WebRTC/Firebase) toi app TV:
  *   - volume / brightness : level = 0..100 (am luong / do sang man hinh TV)
  *   - quality : q = 360 | 720 (chat luong video YouTube)
+ *   - fullscreen : phong to / thu nho video dang phat tren TV
  *   - touchlock : on = true (TV khong nhan cam ung nua) / false
  *   - move   : dx, dy (chuot cam ung, di chuyen tuong doi)
  *   - click  : cham 1 lan tren touchpad
@@ -101,7 +102,7 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
 
     private fun labeled(btn: View, label: String) = LinearLayout(this).apply {
         orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER_HORIZONTAL
-        addView(btn, LinearLayout.LayoutParams(dp(78), dp(78)))
+        addView(btn, LinearLayout.LayoutParams(dp(64), dp(64)))
         addView(caption(label), LinearLayout.LayoutParams(-2, -2).also { it.topMargin = dp(8) })
     }
 
@@ -159,10 +160,14 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
                 refreshTouchButton()
             }
         }
-        touchBox = labeled(btnTouch, "TẮT CẢM ỨNG TV")
-        top.addView(labeled(btnScreen, "TẮT MÀN HÌNH"), LinearLayout.LayoutParams(-2, -2).also { it.rightMargin = dp(12) })
-        top.addView(labeled(btnMic, "GIỌNG NÓI"), LinearLayout.LayoutParams(-2, -2).also { it.rightMargin = dp(12) })
-        top.addView(touchBox, LinearLayout.LayoutParams(-2, -2))
+        touchBox = labeled(btnTouch, "TẮT CẢM\nỨNG TV")
+        val btnFull = IconButton(this, IconButton.FULL).also {
+            it.setOnClickListener { send(JSONObject().put("action", "fullscreen")) }
+        }
+        // 4 nut cung co, cach deu, nhan 2 dong cho can doi
+        for (b in listOf(labeled(btnScreen, "TẮT\nMÀN HÌNH"), labeled(btnMic, "GIỌNG\nNÓI"), touchBox, labeled(btnFull, "PHÓNG TO\nMÀN HÌNH"))) {
+            top.addView(b, LinearLayout.LayoutParams(0, -2, 1f))
+        }
         root.addView(top, LinearLayout.LayoutParams(-1, -2).also { it.topMargin = dp(18) })
         refreshScreenButton()
         refreshTouchButton()
@@ -259,7 +264,7 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
     /** Nut khoa cam ung: dang khoa thi dao mau + co gach cheo, nhan doi thanh "BAT CAM UNG TV". */
     private fun refreshTouchButton() {
         (btnTouch as IconButton).inverted = tvTouchOff
-        (touchBox.getChildAt(1) as TextView).text = if (tvTouchOff) "BẬT CẢM ỨNG TV" else "TẮT CẢM ỨNG TV"
+        (touchBox.getChildAt(1) as TextView).text = if (tvTouchOff) "BẬT CẢM\nỨNG TV" else "TẮT CẢM\nỨNG TV"
     }
 
     /** Nut tat man hinh dao mau (den, icon trang) khi TV dang tat. */

@@ -56,6 +56,14 @@ class IconButton(ctx: Context, private val kind: Int) : View(ctx) {
             val ri = r * 0.38f
             c.drawArc(RectF(cx - ri, cy - ri, cx + ri, cy + ri), -60f, 300f, false, line)
             c.drawLine(cx, cy - r * 0.46f, cx, cy - r * 0.04f, line)
+        } else if (kind == FULL) {
+            // Phong to: 4 goc khung huong ra ngoai
+            val o = r * 0.50f; val l = r * 0.24f
+            for (sx in intArrayOf(-1, 1)) for (sy in intArrayOf(-1, 1)) {
+                val px = cx + sx * o; val py = cy + sy * o
+                c.drawLine(px, py, px - sx * l, py, line)
+                c.drawLine(px, py, px, py - sy * l, line)
+            }
         } else if (kind == TOUCH) {
             // Cham: cham tron + 2 vong lan toa; dang khoa (inverted) them net gach cheo
             fill.color = line.color
@@ -76,5 +84,5 @@ class IconButton(ctx: Context, private val kind: Int) : View(ctx) {
         }
     }
 
-    companion object { const val POWER = 0; const val MIC = 1; const val TOUCH = 2 }
+    companion object { const val POWER = 0; const val MIC = 1; const val TOUCH = 2; const val FULL = 3 }
 }
