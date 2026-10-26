@@ -314,8 +314,11 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
         (touchBox.getChildAt(1) as TextView).text = if (tvTouchOff) "BẬT CẢM\nỨNG TV" else "TẮT CẢM\nỨNG TV"
     }
 
-    /** Nut tat man hinh dao mau (den, icon trang) khi TV dang tat. */
-    private fun refreshScreenButton() { (btnScreen as IconButton).inverted = !tvScreenOn }
+    /** Nut tat man hinh: do khi TV dang sang, xanh khi TV dang tat. */
+    private fun refreshScreenButton() {
+        // Man hinh TV dang sang: nut do (bam de tat); da tat: nut xanh (bam de bat lai)
+        (btnScreen as IconButton).tint = if (tvScreenOn) 0xFFE5322D.toInt() else 0xFF2BB673.toInt()
+    }
 
     // ---------------------------------------------------------------- Touchpad
 

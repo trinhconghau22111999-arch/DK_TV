@@ -26,6 +26,9 @@ private const val ORANGE_DARK = 0xFFE05A00.toInt()
 class IconButton(ctx: Context, private val kind: Int) : View(ctx) {
     var inverted = false
         set(v) { field = v; invalidate() }
+    /** Mau nen rieng (0 = dung mau mac dinh trang/den); co mau thi icon ve mau trang. */
+    var tint = 0
+        set(v) { field = v; invalidate() }
     /** true: nen hinh chu nhat bo goc (icon van ve theo nua canh ngan), false: nen tron. */
     var rect = false
         set(v) { field = v; invalidate() }
@@ -43,12 +46,14 @@ class IconButton(ctx: Context, private val kind: Int) : View(ctx) {
         return super.onTouchEvent(e)
     }
 
+    private fun darken(c: Int) = Color.rgb((Color.red(c) * 0.8f).toInt(), (Color.green(c) * 0.8f).toInt(), (Color.blue(c) * 0.8f).toInt())
+
     override fun drawableStateChanged() { super.drawableStateChanged(); invalidate() }
 
     override fun onDraw(c: Canvas) {
         val cx = width / 2f; val cy = height / 2f
         val r = min(width, height) / 2f - 2f * d
-        fill.color = if (inverted) INK else if (isPressed) PRESSED else PAPER
+        fill.color = if (tint != 0) (if (isPressed) darken(tint) else tint) else if (inverted) INK else if (isPressed) PRESSED else PAPER
         line.color = INK; line.strokeWidth = 2.2f * d
         if (rect) {
             val bg = RectF(2f * d, 2f * d, width - 2f * d, height - 2f * d)
@@ -59,7 +64,7 @@ class IconButton(ctx: Context, private val kind: Int) : View(ctx) {
             c.drawCircle(cx, cy, r, line)
         }
 
-        line.color = if (inverted) PAPER else INK
+        line.color = if (inverted || tint != 0) PAPER else INK
         line.strokeWidth = 3f * d
         if (kind == POWER) {
             val ri = r * 0.38f
