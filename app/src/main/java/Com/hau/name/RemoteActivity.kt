@@ -170,7 +170,8 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
             it.setOnClickListener { send(JSONObject().put("action", "fullscreen")) }
         }
         // 4 nut cung co, cach deu, nhan 2 dong cho can doi
-        for (b in listOf(labeled(btnScreen, "TẮT\nMÀN HÌNH"), labeled(btnMic, "GIỌNG\nNÓI"), touchBox, labeled(btnFull, "PHÓNG TO\nMÀN HÌNH"))) {
+        screenBox = labeled(btnScreen, "TẮT\nMÀN HÌNH")
+        for (b in listOf(screenBox, labeled(btnMic, "GIỌNG\nNÓI"), touchBox, labeled(btnFull, "PHÓNG TO\nMÀN HÌNH"))) {
             top.addView(b, LinearLayout.LayoutParams(0, -2, 1f))
         }
         root.addView(top, LinearLayout.LayoutParams(-1, -2).also { it.topMargin = dp(10) })
@@ -306,6 +307,7 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
 
     private lateinit var btnTouch: View
     private lateinit var touchBox: LinearLayout
+    private lateinit var screenBox: LinearLayout
     private var tvTouchOff = false
 
     /** Nut khoa cam ung: dang khoa thi dao mau + co gach cheo, nhan doi thanh "BAT CAM UNG TV". */
@@ -318,6 +320,7 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
     private fun refreshScreenButton() {
         // Man hinh TV dang sang: nut do (bam de tat); da tat: nut xanh (bam de bat lai)
         (btnScreen as IconButton).tint = if (tvScreenOn) 0xFFE5322D.toInt() else 0xFF2BB673.toInt()
+        (screenBox.getChildAt(1) as TextView).text = if (tvScreenOn) "TẮT\nMÀN HÌNH" else "MỞ\nMÀN HÌNH"
     }
 
     // ---------------------------------------------------------------- Touchpad
