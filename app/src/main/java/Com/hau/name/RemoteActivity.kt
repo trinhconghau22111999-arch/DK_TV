@@ -188,22 +188,26 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
 
         // Thay cho vong dieu huong cu: 2 thanh truot (am luong, do sang) + 2 nut chat luong video 360p / 720p
         val panel = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        panel.addView(sliderRow("ÂM LƯỢNG", "volume", 50), LinearLayout.LayoutParams(-1, dp(28)))
-        panel.addView(sliderRow("ĐỘ SÁNG", "brightness", 70), LinearLayout.LayoutParams(-1, dp(28)).also { it.topMargin = dp(2) })
+        // Hang tren cua panel: 2 thanh truot dich sat trai + nut LUI to ben phai, cao bang 2 thanh cong lai
+        val btnBack = TextView(this).apply {
+            text = "LÙI"; textSize = 16f; gravity = Gravity.CENTER; letterSpacing = 0.06f
+            typeface = Typeface.create("sans-serif-black", Typeface.BOLD)
+            setTextColor(Color.BLACK); background = box(Color.WHITE, 14, 2.2f)
+            setOnClickListener { Haptics.tick(this); send(JSONObject().put("action", "back")) }
+        }
+        val sliders = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        sliders.addView(sliderRow("ÂM LƯỢNG", "volume", 50), LinearLayout.LayoutParams(-1, dp(30)))
+        sliders.addView(sliderRow("ĐỘ SÁNG", "brightness", 70), LinearLayout.LayoutParams(-1, dp(30)).also { it.topMargin = dp(2) })
+        val sliderBack = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        sliderBack.addView(sliders, LinearLayout.LayoutParams(0, -2, 1f))
+        sliderBack.addView(btnBack, LinearLayout.LayoutParams(dp(84), -1).also { it.leftMargin = dp(8) })
+        panel.addView(sliderBack, LinearLayout.LayoutParams(-1, -2))
         // Chat luong video: nhan ben trai + 2 nut cung 1 hang
         val q = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
         q.addView(caption("CHẤT LƯỢNG").also { it.gravity = Gravity.START }, LinearLayout.LayoutParams(dp(LABEL_W), -2))
         btnQ360 = qualityButton(360); btnQ720 = qualityButton(720)
-        // 3 nut cung hang, rong bang nhau, cach deu: 360p | 720p | LÙI (back)
-        val btnBack = TextView(this).apply {
-            text = "LÙI"; textSize = 13f; gravity = Gravity.CENTER; letterSpacing = 0.04f
-            typeface = Typeface.create("sans-serif-black", Typeface.BOLD)
-            setTextColor(Color.BLACK); background = box(Color.WHITE, 12, 2.2f)
-            setOnClickListener { Haptics.tick(this); send(JSONObject().put("action", "back")) }
-        }
-        q.addView(btnQ360, LinearLayout.LayoutParams(0, dp(38), 1f).also { it.rightMargin = dp(4) })
-        q.addView(btnQ720, LinearLayout.LayoutParams(0, dp(38), 1f).also { it.leftMargin = dp(4); it.rightMargin = dp(4) })
-        q.addView(btnBack, LinearLayout.LayoutParams(0, dp(38), 1f).also { it.leftMargin = dp(4) })
+        q.addView(btnQ360, LinearLayout.LayoutParams(0, dp(38), 1f).also { it.rightMargin = dp(6) })
+        q.addView(btnQ720, LinearLayout.LayoutParams(0, dp(38), 1f).also { it.leftMargin = dp(6) })
         panel.addView(q, LinearLayout.LayoutParams(-1, -2).also { it.topMargin = dp(6) })
         // Hang duoi cung: tua lui 10s, phat/dung (1 nut), tua toi 10s, bai/video ke tiep (nut nho, nhan 1 dong)
         val media = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER }
@@ -468,7 +472,7 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
     }
 
     companion object {
-        private const val LABEL_W = 78
+        private const val LABEL_W = 70
         private const val MOVE_GAIN = 1.8f
         private const val SCROLL_GAIN = 1.0f
         private const val TAP_MS = 250L
