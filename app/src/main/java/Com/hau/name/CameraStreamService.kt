@@ -156,6 +156,9 @@ class CameraStreamService : Service() {
             startForeground(NOTIF_ID, buildNotification())
         }
 
+        // Thong bao hien 1 giay (co bieu tuong tren thanh trang thai) roi tu an: van nam trong man hinh keo xuong, khong bi xoa.
+        if (!notifQuiet) handler.postDelayed({ notifQuiet = true; updateNotification() }, 1000)
+
         acquireWakeLock()
 
         val code = roomCode
@@ -372,13 +375,16 @@ class CameraStreamService : Service() {
         }
     }
 
+    /** true sau khi thong bao da hien 1 giay: chuyen sang kenh IMPORTANCE_MIN (khong con bieu tuong tren thanh trang thai). */
+    private var notifQuiet = false
+
     private fun buildNotification(): android.app.Notification {
-        val channelId = "home_camera_channel"
+        val channelId = if (notifQuiet) "home_camera_channel_quiet" else "home_camera_channel"
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val manager = getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(
                 NotificationChannel(channelId, getString(R.string.notif_channel_name),
-                    NotificationManager.IMPORTANCE_LOW)
+                    if (notifQuiet) NotificationManager.IMPORTANCE_MIN else NotificationManager.IMPORTANCE_LOW)
             )
         }
         val stopPendingIntent = PendingIntent.getService(
@@ -392,6 +398,8 @@ class CameraStreamService : Service() {
             .setContentText("$connectedCount/$MAX_VIEWERS_PER_CAMERA máy đang xem. Chạm để kết thúc.")
             .setSmallIcon(android.R.drawable.ic_menu_camera)
             .setOngoing(true)
+            .setOnlyAlertOnce(true)
+            .setPriority(if (notifQuiet) NotificationCompat.PRIORITY_MIN else NotificationCompat.PRIORITY_LOW)
             .addAction(android.R.drawable.ic_menu_close_clear_cancel, "Kết thúc", stopPendingIntent)
             .build()
     }
