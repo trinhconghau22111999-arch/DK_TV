@@ -40,6 +40,7 @@ import kotlin.math.roundToInt
  *   - volume / brightness : level = 0..100 (am luong / do sang man hinh TV)
  *   - quality : q = 360 | 720 (chat luong video YouTube)
  *   - fullscreen : phong to / thu nho video dang phat tren TV
+ *   - media : cmd = rew | fwd | playpause | next (tua 10 giay, phat/dung, bai/video ke tiep)
  *   - touchlock : on = true (TV khong nhan cam ung nua) / false
  *   - move   : dx, dy (chuot cam ung, di chuyen tuong doi)
  *   - click  : cham 1 lan tren touchpad
@@ -192,6 +193,18 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
         q.addView(btnQ360, LinearLayout.LayoutParams(0, dp(52), 1f).also { it.rightMargin = dp(8) })
         q.addView(btnQ720, LinearLayout.LayoutParams(0, dp(52), 1f).also { it.leftMargin = dp(8) })
         panel.addView(q, LinearLayout.LayoutParams(-1, -2).also { it.topMargin = dp(8) })
+        // Hang duoi cung: tua lui 10s, phat/dung (1 nut), tua toi 10s, bai/video ke tiep
+        val media = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER }
+        fun mediaBtn(kind: Int, label: String, cmd: String) = labeled(
+            IconButton(this, kind).also { b -> b.setOnClickListener { send(JSONObject().put("action", "media").put("cmd", cmd)) } }, label)
+        for (b in listOf(
+            mediaBtn(IconButton.REW, "LÙI\n10 GIÂY", "rew"),
+            mediaBtn(IconButton.PLAY, "PHÁT /\nDỪNG", "playpause"),
+            mediaBtn(IconButton.FWD, "TIẾN\n10 GIÂY", "fwd"),
+            mediaBtn(IconButton.NEXT, "BÀI\nTIẾP", "next"))) {
+            media.addView(b, LinearLayout.LayoutParams(0, -2, 1f))
+        }
+        panel.addView(media, LinearLayout.LayoutParams(-1, -2).also { it.topMargin = dp(18) })
         root.addView(panel, LinearLayout.LayoutParams(-1, -2))
         refreshQuality()
         return root

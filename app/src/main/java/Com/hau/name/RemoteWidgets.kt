@@ -56,6 +56,44 @@ class IconButton(ctx: Context, private val kind: Int) : View(ctx) {
             val ri = r * 0.38f
             c.drawArc(RectF(cx - ri, cy - ri, cx + ri, cy + ri), -60f, 300f, false, line)
             c.drawLine(cx, cy - r * 0.46f, cx, cy - r * 0.04f, line)
+        } else if (kind == REW || kind == FWD) {
+            // Tua 10 giay: 2 tam giac cung huong + so "10" ben duoi
+            fill.color = line.color
+            val dir = if (kind == FWD) 1f else -1f
+            val t = r * 0.22f
+            for (k in 0..1) {
+                val x = cx + dir * (k - 0.5f) * t * 1.7f
+                val tri = Path().apply {
+                    moveTo(x + dir * t, cy - r * 0.16f)
+                    lineTo(x - dir * t * 0.8f, cy - r * 0.16f - t)
+                    lineTo(x - dir * t * 0.8f, cy - r * 0.16f + t)
+                    close()
+                }
+                c.drawPath(tri, fill)
+            }
+            fill.textSize = r * 0.40f; fill.textAlign = Paint.Align.CENTER
+            fill.typeface = Typeface.create("sans-serif-medium", Typeface.BOLD)
+            c.drawText("10", cx, cy + r * 0.62f, fill)
+        } else if (kind == PLAY) {
+            // Phat / dung trong 1 nut: tam giac + 2 vach
+            fill.color = line.color
+            val t = r * 0.30f
+            val tx = cx - r * 0.24f
+            c.drawPath(Path().apply {
+                moveTo(tx + t, cy); lineTo(tx - t * 0.8f, cy - t * 1.1f); lineTo(tx - t * 0.8f, cy + t * 1.1f); close()
+            }, fill)
+            val bw = r * 0.10f
+            c.drawRect(cx + r * 0.22f, cy - t * 1.0f, cx + r * 0.22f + bw, cy + t * 1.0f, fill)
+            c.drawRect(cx + r * 0.46f, cy - t * 1.0f, cx + r * 0.46f + bw, cy + t * 1.0f, fill)
+        } else if (kind == NEXT) {
+            // Bai/video ke tiep: tam giac + vach dung
+            fill.color = line.color
+            val t = r * 0.30f
+            val tx = cx - r * 0.08f
+            c.drawPath(Path().apply {
+                moveTo(tx + t, cy); lineTo(tx - t * 0.9f, cy - t * 1.1f); lineTo(tx - t * 0.9f, cy + t * 1.1f); close()
+            }, fill)
+            c.drawRect(cx + r * 0.34f, cy - t * 1.1f, cx + r * 0.34f + r * 0.11f, cy + t * 1.1f, fill)
         } else if (kind == FULL) {
             // Phong to: 4 goc khung huong ra ngoai
             val o = r * 0.50f; val l = r * 0.24f
@@ -84,5 +122,5 @@ class IconButton(ctx: Context, private val kind: Int) : View(ctx) {
         }
     }
 
-    companion object { const val POWER = 0; const val MIC = 1; const val TOUCH = 2; const val FULL = 3 }
+    companion object { const val POWER = 0; const val MIC = 1; const val TOUCH = 2; const val FULL = 3; const val REW = 4; const val FWD = 5; const val PLAY = 6; const val NEXT = 7 }
 }
