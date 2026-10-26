@@ -41,6 +41,7 @@ import kotlin.math.roundToInt
  * (cung ma co dinh 123456, cung ket noi WebRTC/Firebase) toi app TV:
  *   - volume / brightness : level = 0..100 (am luong / do sang man hinh TV)
  *   - quality : q = 360 | 720 (chat luong video YouTube)
+ *   - back : nut LUI - lui 1 buoc tren TV (giong nut Back)
  *   - fullscreen : phong to / thu nho video dang phat tren TV
  *   - media : cmd = rew | fwd | playpause | next (tua 10 giay, phat/dung, bai/video ke tiep)
  *   - touchlock : on = true (TV khong nhan cam ung nua) / false
@@ -106,8 +107,8 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
     private fun labeled(btn: View, label: String, size: Int = 64, compact: Boolean = false) = LinearLayout(this).apply {
         orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER_HORIZONTAL
         addView(btn, LinearLayout.LayoutParams(dp(size), dp(size)))
-        addView(caption(label).also { if (compact) { it.textSize = 9.5f; it.letterSpacing = 0.06f } },
-            LinearLayout.LayoutParams(-2, -2).also { it.topMargin = dp(if (compact) 4 else 8) })
+        addView(caption(label).also { if (compact) { it.textSize = 9f; it.letterSpacing = 0.04f } },
+            LinearLayout.LayoutParams(-2, -2).also { it.topMargin = dp(if (compact) 2 else 6) })
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -123,7 +124,7 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setBackgroundColor(Color.WHITE)
-            setPadding(dp(20), dp(14), dp(20), dp(12))
+            setPadding(dp(20), dp(10), dp(20), dp(6))
         }
 
         // Dau trang: ten (chu hoa, gian chu) + trang thai ket noi
@@ -141,7 +142,7 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
         head.addView(statusText)
         root.addView(head, LinearLayout.LayoutParams(-1, -2))
         root.addView(View(this).apply { setBackgroundColor(Color.BLACK) },
-            LinearLayout.LayoutParams(-1, dp(2)).also { it.topMargin = dp(12) })
+            LinearLayout.LayoutParams(-1, dp(2)).also { it.topMargin = dp(8) })
 
         // Hang tren: tat man hinh + giong noi
         btnScreen = IconButton(this, IconButton.POWER).also {
@@ -172,7 +173,7 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
         for (b in listOf(labeled(btnScreen, "TẮT\nMÀN HÌNH"), labeled(btnMic, "GIỌNG\nNÓI"), touchBox, labeled(btnFull, "PHÓNG TO\nMÀN HÌNH"))) {
             top.addView(b, LinearLayout.LayoutParams(0, -2, 1f))
         }
-        root.addView(top, LinearLayout.LayoutParams(-1, -2).also { it.topMargin = dp(18) })
+        root.addView(top, LinearLayout.LayoutParams(-1, -2).also { it.topMargin = dp(10) })
         refreshScreenButton()
         refreshTouchButton()
 
@@ -183,24 +184,32 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
             setTextColor(0xFF6B6B6B.toInt()); textSize = 12f; gravity = Gravity.CENTER; setLineSpacing(0f, 1.4f)
         }, FrameLayout.LayoutParams(-1, -1))
         attachTouchpad(pad)
-        root.addView(pad, LinearLayout.LayoutParams(-1, 0, 1f).also { it.topMargin = dp(14); it.bottomMargin = dp(10) })
+        root.addView(pad, LinearLayout.LayoutParams(-1, 0, 1f).also { it.topMargin = dp(8); it.bottomMargin = dp(4) })
 
         // Thay cho vong dieu huong cu: 2 thanh truot (am luong, do sang) + 2 nut chat luong video 360p / 720p
         val panel = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        panel.addView(sliderRow("ÂM LƯỢNG", "volume", 50), LinearLayout.LayoutParams(-1, dp(44)))
-        panel.addView(sliderRow("ĐỘ SÁNG", "brightness", 70), LinearLayout.LayoutParams(-1, dp(44)).also { it.topMargin = dp(4) })
+        panel.addView(sliderRow("ÂM LƯỢNG", "volume", 50), LinearLayout.LayoutParams(-1, dp(48)))
+        panel.addView(sliderRow("ĐỘ SÁNG", "brightness", 70), LinearLayout.LayoutParams(-1, dp(48)).also { it.topMargin = dp(2) })
         // Chat luong video: nhan ben trai + 2 nut cung 1 hang
         val q = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
         q.addView(caption("CHẤT LƯỢNG").also { it.gravity = Gravity.START }, LinearLayout.LayoutParams(dp(LABEL_W), -2))
         btnQ360 = qualityButton(360); btnQ720 = qualityButton(720)
-        q.addView(btnQ360, LinearLayout.LayoutParams(0, dp(42), 1f).also { it.rightMargin = dp(6) })
-        q.addView(btnQ720, LinearLayout.LayoutParams(0, dp(42), 1f).also { it.leftMargin = dp(6) })
-        panel.addView(q, LinearLayout.LayoutParams(-1, -2).also { it.topMargin = dp(8) })
+        // 3 nut cung hang, rong bang nhau, cach deu: 360p | 720p | LÙI (back)
+        val btnBack = TextView(this).apply {
+            text = "LÙI"; textSize = 13f; gravity = Gravity.CENTER; letterSpacing = 0.04f
+            typeface = Typeface.create("sans-serif-black", Typeface.BOLD)
+            setTextColor(Color.BLACK); background = box(Color.WHITE, 12, 2.2f)
+            setOnClickListener { Haptics.tick(this); send(JSONObject().put("action", "back")) }
+        }
+        q.addView(btnQ360, LinearLayout.LayoutParams(0, dp(38), 1f).also { it.rightMargin = dp(4) })
+        q.addView(btnQ720, LinearLayout.LayoutParams(0, dp(38), 1f).also { it.leftMargin = dp(4); it.rightMargin = dp(4) })
+        q.addView(btnBack, LinearLayout.LayoutParams(0, dp(38), 1f).also { it.leftMargin = dp(4) })
+        panel.addView(q, LinearLayout.LayoutParams(-1, -2).also { it.topMargin = dp(6) })
         // Hang duoi cung: tua lui 10s, phat/dung (1 nut), tua toi 10s, bai/video ke tiep (nut nho, nhan 1 dong)
         val media = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER }
         fun mediaBtn(kind: Int, label: String, cmd: String) = labeled(
             IconButton(this, kind).also { b -> b.setOnClickListener { send(JSONObject().put("action", "media").put("cmd", cmd)) } },
-            label, 50, true)
+            label, 40, true)
         for (b in listOf(
             mediaBtn(IconButton.REW, "LÙI 10s", "rew"),
             mediaBtn(IconButton.PLAY, "PHÁT/DỪNG", "playpause"),
@@ -208,7 +217,7 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
             mediaBtn(IconButton.NEXT, "BÀI TIẾP", "next"))) {
             media.addView(b, LinearLayout.LayoutParams(0, -2, 1f))
         }
-        panel.addView(media, LinearLayout.LayoutParams(-1, -2).also { it.topMargin = dp(10) })
+        panel.addView(media, LinearLayout.LayoutParams(-1, -2).also { it.topMargin = dp(6) })
         root.addView(panel, LinearLayout.LayoutParams(-1, -2))
         refreshQuality()
         return root
@@ -218,7 +227,7 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
     private lateinit var btnQ720: TextView
     private var quality = 0
 
-    /** Thanh truot kieu Sony: duong day (cao 16dp) vien den, phan da keo to den, nut tron cam lon; 1 hang: nhan | thanh | so. */
+    /** Thanh truot kieu Sony: duong day (cao 24dp) vien den, phan da keo to den, nut tron cam lon; 1 hang: nhan | thanh | so. */
     private fun sliderRow(label: String, action: String, initial: Int): View = LinearLayout(this).apply {
         orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
         val value = TextView(this@RemoteActivity).apply {
@@ -226,7 +235,7 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
             typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
         }
         addView(caption(label).also { it.gravity = Gravity.START }, LinearLayout.LayoutParams(dp(LABEL_W), -2))
-        val trackH = dp(16)
+        val trackH = dp(24)
         val bg = GradientDrawable().apply {
             setColor(0xFFE6E6E6.toInt()); cornerRadius = trackH / 2f; setStroke(dp(2), Color.BLACK); setSize(-1, trackH)
         }
@@ -234,7 +243,7 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
         val layers = LayerDrawable(arrayOf<Drawable>(bg, ClipDrawable(fg, Gravity.START, ClipDrawable.HORIZONTAL)))
         layers.setId(0, android.R.id.background); layers.setId(1, android.R.id.progress)
         val knob = GradientDrawable().apply {
-            shape = GradientDrawable.OVAL; setColor(0xFFFF6B00.toInt()); setStroke(dp(2), Color.BLACK); setSize(dp(30), dp(30))
+            shape = GradientDrawable.OVAL; setColor(0xFFFF6B00.toInt()); setStroke(dp(2), Color.BLACK); setSize(dp(40), dp(40))
         }
         val sb = SeekBar(this@RemoteActivity).apply {
             max = 100; progress = initial
@@ -264,7 +273,7 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
     }
 
     private fun qualityButton(q: Int) = TextView(this).apply {
-        text = "${q}p"; textSize = 15f; gravity = Gravity.CENTER; letterSpacing = 0.06f
+        text = "${q}p"; textSize = 13f; gravity = Gravity.CENTER; letterSpacing = 0.06f
         typeface = Typeface.create("sans-serif-black", Typeface.BOLD)
         setOnClickListener {
             Haptics.tick(this)
@@ -278,7 +287,7 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
     private fun refreshQuality() {
         for ((b, q) in listOf(btnQ360 to 360, btnQ720 to 720)) {
             val on = quality == q
-            b.background = box(if (on) Color.BLACK else Color.WHITE, 14, 2.2f)
+            b.background = box(if (on) Color.BLACK else Color.WHITE, 12, 2.2f)
             b.setTextColor(if (on) Color.WHITE else Color.BLACK)
         }
     }
