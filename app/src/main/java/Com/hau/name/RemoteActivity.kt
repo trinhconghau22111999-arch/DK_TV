@@ -39,6 +39,7 @@ import kotlin.math.roundToInt
  * (cung ma co dinh 123456, cung ket noi WebRTC/Firebase) toi app TV:
  *   - volume / brightness : level = 0..100 (am luong / do sang man hinh TV)
  *   - quality : q = 360 | 720 (chat luong video YouTube)
+ *   - touchlock : on = true (TV khong nhan cam ung nua) / false
  *   - move   : dx, dy (chuot cam ung, di chuyen tuong doi)
  *   - click  : cham 1 lan tren touchpad
  *   - scroll : dy (2 ngon tay truot)
@@ -151,10 +152,20 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
             }
         }
         val top = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER }
-        top.addView(labeled(btnScreen, "TẮT MÀN HÌNH"), LinearLayout.LayoutParams(-2, -2).also { it.rightMargin = dp(36) })
-        top.addView(labeled(btnMic, "GIỌNG NÓI"), LinearLayout.LayoutParams(-2, -2))
+        btnTouch = IconButton(this, IconButton.TOUCH).also {
+            it.setOnClickListener {
+                tvTouchOff = !tvTouchOff
+                send(JSONObject().put("action", "touchlock").put("on", tvTouchOff))
+                refreshTouchButton()
+            }
+        }
+        touchBox = labeled(btnTouch, "TẮT CẢM ỨNG TV")
+        top.addView(labeled(btnScreen, "TẮT MÀN HÌNH"), LinearLayout.LayoutParams(-2, -2).also { it.rightMargin = dp(12) })
+        top.addView(labeled(btnMic, "GIỌNG NÓI"), LinearLayout.LayoutParams(-2, -2).also { it.rightMargin = dp(12) })
+        top.addView(touchBox, LinearLayout.LayoutParams(-2, -2))
         root.addView(top, LinearLayout.LayoutParams(-1, -2).also { it.topMargin = dp(18) })
         refreshScreenButton()
+        refreshTouchButton()
 
         // Chuot cam ung: khung trang vien den
         val pad = FrameLayout(this).apply { background = box(Color.WHITE, 24, 2.2f) }
@@ -239,6 +250,16 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
             b.background = box(if (on) Color.BLACK else Color.WHITE, 14, 2.2f)
             b.setTextColor(if (on) Color.WHITE else Color.BLACK)
         }
+    }
+
+    private lateinit var btnTouch: View
+    private lateinit var touchBox: LinearLayout
+    private var tvTouchOff = false
+
+    /** Nut khoa cam ung: dang khoa thi dao mau + co gach cheo, nhan doi thanh "BAT CAM UNG TV". */
+    private fun refreshTouchButton() {
+        (btnTouch as IconButton).inverted = tvTouchOff
+        (touchBox.getChildAt(1) as TextView).text = if (tvTouchOff) "BẬT CẢM ỨNG TV" else "TẮT CẢM ỨNG TV"
     }
 
     /** Nut tat man hinh dao mau (den, icon trang) khi TV dang tat. */

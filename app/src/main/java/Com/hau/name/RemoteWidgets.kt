@@ -56,6 +56,17 @@ class IconButton(ctx: Context, private val kind: Int) : View(ctx) {
             val ri = r * 0.38f
             c.drawArc(RectF(cx - ri, cy - ri, cx + ri, cy + ri), -60f, 300f, false, line)
             c.drawLine(cx, cy - r * 0.46f, cx, cy - r * 0.04f, line)
+        } else if (kind == TOUCH) {
+            // Cham: cham tron + 2 vong lan toa; dang khoa (inverted) them net gach cheo
+            fill.color = line.color
+            c.drawCircle(cx, cy, r * 0.10f, fill)
+            line.strokeWidth = 2.6f * d
+            c.drawCircle(cx, cy, r * 0.30f, line)
+            c.drawCircle(cx, cy, r * 0.52f, line)
+            if (inverted) {
+                line.strokeWidth = 3.4f * d
+                c.drawLine(cx - r * 0.58f, cy + r * 0.58f, cx + r * 0.58f, cy - r * 0.58f, line)
+            }
         } else {
             val cap = RectF(cx - r * 0.14f, cy - r * 0.50f, cx + r * 0.14f, cy + r * 0.06f)
             c.drawRoundRect(cap, r * 0.14f, r * 0.14f, line)
@@ -65,5 +76,5 @@ class IconButton(ctx: Context, private val kind: Int) : View(ctx) {
         }
     }
 
-    companion object { const val POWER = 0; const val MIC = 1 }
+    companion object { const val POWER = 0; const val MIC = 1; const val TOUCH = 2 }
 }
