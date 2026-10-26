@@ -26,7 +26,6 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import org.json.JSONObject
 import java.util.Locale
@@ -468,28 +467,9 @@ class RemoteActivity : AppCompatActivity(), CameraStreamService.ConnectionStatus
         }
     }
 
-    // Thanh thong bao (trang thai) tren cung: hien 1 giay roi tu an; vuot tu mep tren xuong de goi lai (tam thoi), khong thoat app.
-    private val hideStatusBar = Runnable {
-        WindowInsetsControllerCompat(window, window.decorView).apply {
-            systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            hide(WindowInsetsCompat.Type.statusBars())
-        }
-    }
-
-    private fun scheduleHideStatusBar() {
-        ui.removeCallbacks(hideStatusBar)
-        ui.postDelayed(hideStatusBar, 1000)
-    }
-
-    override fun onWindowFocusChanged(hasFocus: Boolean) {
-        super.onWindowFocusChanged(hasFocus)
-        if (hasFocus) scheduleHideStatusBar()
-    }
-
     override fun onResume() {
         super.onResume()
         ui.post(attachLoop)
-        scheduleHideStatusBar()
     }
 
     override fun onPause() {
